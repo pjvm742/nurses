@@ -1,0 +1,5 @@
+We use the parsing code of Duysak, Karzel and Schmitt.
+Clone the following git repository: https://github.com/DennisDuysak/nrp
+Then move/copy the source directories "Helper" and "Attributes" into our "code" directory.
+
+This is automated by deps.sh
