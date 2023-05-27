@@ -3,4 +3,4 @@
 cd dep || exit 1
 git clone https://github.com/DennisDuysak/nrp
 cd ..
-cp -r -t code dep/nrp/src/Helper dep/nrp/src/Attributes
+mv dep/nrp/src/Helper dep/nrp/src/Attributes code
