@@ -1,7 +1,45 @@
 \documentclass{article}
 
+\usepackage[boxed,vlined]{algorithm2e}
+
+
 \title{An algorithm for the nurse rostering problem}
 
 \begin{document}
 \maketitle
+
+\section{Algorithm}
+
+\begin{algorithm}[H]
+\DontPrintSemicolon
+\KwData{a set of nurses $N$, a set of days $D$ and shift types $S$, requirement for each shift type on each day $r_{s,d}$, and a set $C$ of soft constraints}
+\KwResult{the best schedule $S$ found}
+	\While{there is running time left}{
+		let $S'$ be a copy of the current solution S \;
+		choose the $k_N$ and $k_C$ for this iteration \;
+		randomly select $N^{destroy} \subset N$ with $|N^{destroy}| = k_N$ \;
+		randomly select $C^{destroy} \subset C$ with $|C^{destroy}| = k_C$ \;
+		\For{all nurses $i \in N^{destroy}$}{
+			\For{all constraints $c \in C^{destroy}$}{
+				eliminate all violations of constraint $c$ from $S'_i$ \;
+			}
+		}
+		let $D'$ be a random permutation of $D$ \;
+		\For{each day $d \in D'$}{
+			let $N_{s,d}$ be the set of nurses assigned to shift type $s$ on day $d$ \;
+			let $n_{s,d} = |N_{s,d}|$ \;
+			\While{$\exists s : n_{s,d} > r_{s,d}$}{
+				let $i^* \in N_{s,d}$ be the nurse for whom the assignment contributes the most to soft constraint violations \;
+				$S'_{i^*,d} \gets s_{off}$ \;
+			}
+			\While{$\exists s : n_{s,d} < r_{s,d}$}{
+				let $i^* \in N_{s_{off},d}$ be the nurse for whom assigning $s$ will contribute the least to soft constraint violations \;
+				$S'_{i^*,d} \gets s$ \;
+			}
+		}
+		\If{$objective_C(S') \leq objective_C(S)$}{
+			$S \gets S'$ \;
+		}
+	}
+\end{algorithm}
 \end{document}

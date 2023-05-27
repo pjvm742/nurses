@@ -1,3 +1,6 @@
 dep/*
 code/Helper/*
 code/Attributes/*
+*.pdf
+*.aux
+*.log
