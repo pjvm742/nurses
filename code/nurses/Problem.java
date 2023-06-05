@@ -1,3 +1,5 @@
+package nurses;
+
 public class Problem {
 
 	class NurseEvaluator { // super-evaluator for the constraints of one nurse

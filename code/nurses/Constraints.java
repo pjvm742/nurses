@@ -1,3 +1,5 @@
+package nurses;
+
 public class Constraints {
 	
 	public abstract class ConstraintEvaluator {
