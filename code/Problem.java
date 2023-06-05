@@ -1,10 +1,4 @@
 public class Problem {
-	
-	abstract class ConstraintEvaluator {
-		public int Evaluate(int[] roster); // determines the number of violations of this constraint in the roster
-		public int Contribution(int[] roster, int position); // determines the number of violations of this constraint that one day is involved in
-		public int[] enforce(int[] roster); // removes all violations of this constraint
-	}
 
 	class Contract { // super-evaluator for the constraints of one nurse
 		ConstraintEvaluator[] constraints;
@@ -52,5 +46,19 @@ public class Problem {
 		int[][] demands = new int[D][S];
 	}
 
+	class WeekendDef {
+		int start;
+		int end;
+		
+		public WeekendDef(int start, int end) {
+			this.start = start;
+			this.end = end;
+		}
+		
+		public boolean isWeekend(int day) {
+			
+			
+		}
+	}
 
 }
