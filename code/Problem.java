@@ -1,49 +1,62 @@
 public class Problem {
 
-	class Contract { // super-evaluator for the constraints of one nurse
+	class NurseEvaluator { // super-evaluator for the constraints of one nurse
 		ConstraintEvaluator[] constraints;
-		double[] ConstraintWeights;
+		int[] weights;
 
-		public int[] enforce(int[] roster, int constraint) {
+		public NurseEvaluator(ConstraintEvaluator[] constraints, int[] weights) {
+			this.constraints = constraints;
+			this.weights = weights;
+		}
+
+		public int[] Enforce(int[] roster, int constraint) {
 
 		}
 		
-		public double Contribution(int[] roster, int position) {
+		public int Contribution(int[] roster, int position) {
 
 		}
 
-		public double Evaluate(int[] roster) {
+		public int Evaluate(int[] roster) {
 
 		}
 
 	}
 
 	class ProblemInstance {
-		int dayoffset; // 0: Monday, ..., 6: Sunday; weekday of day i is: (i + offset) % 7
-		int N; // number of nurses
-		int D; // number of days
-		int S; // number of shift types
-		int nskills;
-		int[] skillNeeded = new int[S];
-		boolean[] nightShift = new boolean[S];
+		public int N; // number of nurses
+		public int D; // number of days
+		public int S; // number of shift types
 
-		Contract[] nurseTypes;
+		public int[][] demands;
+		
+		public NurseEvaluator[] nurses;
+		public int nUsedConstraints;
+		public int[] constraintIDs;
 
-		public int nConstraints;
+		public ProblemInstance(int[][] demands, NurseEvaluator[] nurses, int nused, int[] usedConstraints, int N, int D, int S) {
+			this.N = N;
+			this.D = D;
+			this.S = S;
 
-		double Evaluate(int[] roster, int nurse) {
+			this.demands = demands;
+
+			this.nurses = nurses;
+			this.nUsedConstraints = nused;
+			this.constraintIDs = usedConstraints;
+		}
+
+		public int Evaluate(int[] roster, int nurse) {
 
 		}
 
-		public int[] enforce(int constraint, int nurse) {
+		public int[] Enforce(int constraint, int nurse) {
 
 		}
 		
-		public double Contribution(int[] roster, int position, int nurse) {
+		public int Contribution(int[] roster, int position, int nurse) {
 
 		}
-
-		int[][] demands = new int[D][S];
 	}
 
 	class WeekendDef {
