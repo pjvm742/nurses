@@ -96,10 +96,11 @@ public class Constraints {
 		for (int d = 0; d < D; d++) {
 			if (roster[d] > 0) {
 				nseq++;
-			} else if(nseq < min) {
+			} else {
+				if(nseq < min) {
 				violation += min - nseq;
 			            nseq = 0;
-					
+				}	
 			}
 		}
 		if(nseq < min) {
@@ -307,5 +308,227 @@ public class Constraints {
 		}
 
 		}
+	
+	public class CompleteWeekends extends ConstraintEvaluator {
+		WeekendDef wknd;
+
+		public CompleteWeekends(WeekendDef w) {
+			this.wknd = w;
+		}
+		
+		public int Evaluate(int[] roster) {
+			int D = roster.length;
+			int violation = 0;
+			for (int d = 0; d < D; d++) {
+				int weekday = ( d + dayoffset ) %7;
+				if(weekday = w.start) {
+					if(roster[d] > 0) {
+						for(int i = 1; i < 4; i++) {                //max weekend length is equal to 4 days
+							if(isWeekend(d+i) && roster[d+i] == 0) {
+									violation++;
+									break;
+							}
+						}
+					}
+					else {
+						for(int i = 1; i < 4; i++) { 
+							if(isWeekend(d+i) && roster[d+i] > 0) {
+									violation++;
+									break;
+							}
+						}
+					}
+				}
+					
+			}
+			return violation;
+		}
+
+		public int Contribution(int[] roster, int pos) {
+			int D = roster.length;
+			if (isWeekend(roster[pos]) && roster[pos] > 0) {
+				for(int i = 1; i < 4; i++) {                             
+					if(isWeekend(roster[pos-i]) && roster[pos-i] == 0) {
+						return 1;
+					}
+				}
+				for(int i = 1; i < 4; i++) {
+					if(isWeekend(roster[pos+i]) && roster[pos+i] == 0) {
+						return 1;
+					}
+			    }
+			}
+			else if(isWeekend(roster[pos]) && roster[pos] == 0) {
+				for(int i = 1; i < 4; i++) {                             
+					if (isWeekend(roster[pos-i]) && roster[pos-i] > 0) {
+						return 1;
+					}
+				}
+				for(int i = 1; i < 4; i++) {
+					if(isWeekend(roster[pos+i]) && roster[pos+i] > 0) {
+						return 1;
+					}
+			    }
+			}
+			return 0;
+		}
+
+		public int[] Enforce(int[] origRoster) {
+			int D = origRoster.length;
+			int[] roster = new int[D];
+			int nseq = 0;
+			for (int d = 0; d < D; d++) {
+				roster[d] = origRoster[d];
+			}
+			
+			return roster;
+		}
+	}
+	
+	public class MaxConsecutiveWorkingWeekends extends ConstraintEvaluator {
+		int max;
+		WeekendDef wknd;
+
+		public MaxConsecutiveWorkingWeekends(int k, WeekendDef w) {
+			this.max = k;
+			this.wknd = w;
+		}
+		
+		public int Evaluate(int[] roster) {
+			int D = roster.length;
+			int nseq = 0;
+			int violation = 0;
+			for (int d = 0; d < D; d++) {
+				int weekday = ( d + dayoffset ) %7;
+				if(weekday = w.start) {
+				  boolean workWeekend = false;
+				  for(int i = 0; i < 4; i++) {
+					  if(isWeekend(d+i) && roster[d+i] > 0) {
+						  nseq++;
+						  workWeekend = true;
+						  break;
+					  }
+					  else if(!workWeekend) {
+						  if(nseq > max) {
+							  violation++;
+						  }
+						  nseq = 0;
+					  }
+				  }
+				  workWeekend = false;
+				}
+			}
+				
+			return violation;
+		}
+
+		public int Contribution(int[] roster, int pos) {
+			int D = roster.length;
+			if (isWeekend(roster[pos]) && roster[pos] > 0) {
+
+			}
+			return 0;
+		}
+
+		public int[] Enforce(int[] origRoster) {
+			
+			return roster;
+		}
+	}
+	
+	public class MinConsecutiveWorkingWeekends extends ConstraintEvaluator {
+		int min;
+		WeekendDef wknd;
+
+		public MinConsecutiveWorkingWeekends(int k, WeekendDef w) {
+			this.min = k;
+			this.wknd = w;
+		}
+		
+		public int Evaluate(int[] roster) {
+			int D = roster.length;
+			int nseq = 0;
+			int violation = 0;
+			for (int d = 0; d < D; d++) {
+				int weekday = ( d + dayoffset ) %7;
+				if(weekday = w.start) {
+					boolean workWeekend = false;
+				  for(int i = 0; i < 4; i++) {
+					  if(isWeekend(d+i) && roster[d+i] > 0) {
+						  nseq++;
+						  workWeekend = true;
+					  }
+					  else if(!workWeekend) {
+						  if(nseq < min) {
+							  violation++;
+						  }
+						  nseq = 0;
+					  }
+				  }
+				  workWeekend = false;
+				}
+			}
+				
+			return violation;
+		}
+
+		public int Contribution(int[] roster, int pos) {
+			int D = roster.length;
+			if (isWeekend(roster[pos]) && roster[pos] > 0)
+			return 0;
+		}
+
+		public int[] Enforce(int[] origRoster) {
+			
+			return roster;
+		}
+	}
+	
+	public class MaxWeekends4weeks extends ConstraintEvaluator {
+		int max;
+		WeekendDef wknd;
+
+		public MaxWeekends4weeks(int k, WeekendDef w) {
+			this.max = k;
+			this.wknd = w;
+		}
+		
+		public int Evaluate(int[] roster) {
+			int D = roster.length;
+			int workWeekends = 0;
+			int violation = 0;
+			for (int d = 0; d < D; d++) {
+				int weekday = ( d + dayoffset ) %7;
+				if(weekday = w.start) {
+				  boolean workWeekend = false;
+				  for(int j = 0; j < 28; j += 7) {
+					  for(int i = 0; i < 4; i++) {
+						  if(isWeekend(d+j+i) && roster[d+j+i] > 0) {
+						  workWeekends++;
+						  workWeekend = true;
+						  break;
+						  }
+					  }
+				  workWeekend = false;
+				  }
+				  if(workWeekends > max) {
+					  violation++;
+				  }
+				}
+			}	
+			return violation;
+		}
+
+		public int Contribution(int[] roster, int pos) {
+			int D = roster.length;
+			return 0;
+		}
+
+		public int[] Enforce(int[] origRoster) {
+			
+			return roster;
+		}
+	}
+	
 	
 }

@@ -56,9 +56,17 @@ public class Problem {
 		}
 		
 		public boolean isWeekend(int day) {
+			int weekday = ( day + dayoffset ) %7;
 			
+			if(weekday >= start) {
+				return true;
+			}else if(weekday == end) {
+				return true;
+			}
+			return false;
 			
 		}
 	}
+	
 
 }
