@@ -530,5 +530,81 @@ public class Constraints {
 		}
 	}
 	
+	public class identicalShiftTypesDuringWeekend extends ConstraintEvaluator {
+		WeekendDef wknd;
+
+		public identicalShiftTypesDuringWeekend(int k, WeekendDef w) {
+			this.wknd = w;
+		}
+		
+		public int Evaluate(int[] roster) {
+			int D = roster.length;
+			int violation = 0;
+			for (int d = 0; d < D; d++) {
+				int weekday = ( d + dayoffset ) %7;
+				if(weekday = w.start) {
+					  for(int i = 0; i < 4; i++) {
+						  if(isWeekend(d+i) && roster[d+i] != roster[d]) {
+						  violation++;
+						  break;
+						  }
+					  }
+				}
+			}
+				
+			return violation;
+		}
+
+		public int Contribution(int[] roster, int pos) {
+			int D = roster.length;
+			return 0;
+		}
+
+		public int[] Enforce(int[] origRoster) {
+			
+			return roster;
+		}
+	}
+	
+	public class noNightShiftBeforeWeekend extends ConstraintEvaluator {
+		WeekendDef wknd;
+
+		public noNightShiftBeforeWeekend(int k, WeekendDef w) {
+			this.wknd = w;
+		}
+		
+		public int Evaluate(int[] roster) {
+			int D = roster.length;
+			int violation = 0;
+			for (int d = 0; d < D; d++) {
+				int weekday = ( d + dayoffset ) %7;
+				if(weekday = w.start) {
+					  for(int i = 0; i < 4; i++) {
+						  boolean workingWeekend = false;
+						  if(isWeekend(d+i) && roster[d+i] != 0) {
+						  workingWeekend true;
+						  }
+						  if(!workingWeekend) {
+							  if(roster[d-1] == NIGHTSHIFTINDEX) {
+								  violation++;
+							  }
+						  }
+					  }
+				}
+			}
+				
+			return violation;
+		}
+
+		public int Contribution(int[] roster, int pos) {
+			int D = roster.length;
+			return 0;
+		}
+
+		public int[] Enforce(int[] origRoster) {
+			
+			return roster;
+		}
+	}
 	
 }
