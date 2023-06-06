@@ -1,4 +1,4 @@
-
+package nurses;
 
 public class Constraints {
 	
@@ -8,6 +8,18 @@ public class Constraints {
 		public abstract int[] Enforce(int[] roster); // removes all violations of this constraint
 	}
 	
+	public class EmptyConstraint extends ConstraintEvaluator {
+		public int Evaluate(int[] roster) {
+			return 0;
+		}
+		public int Contribution(int[] roster, int positition) {
+			return 0;
+		}
+		public int[] Enforce(int[] roster) {
+			return roster;
+		}
+	}
+
 	public class MaxConsecutiveWorking extends ConstraintEvaluator {
 		int max;
 
