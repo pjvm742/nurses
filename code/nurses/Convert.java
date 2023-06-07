@@ -125,11 +125,15 @@ public class Convert {
 			}
 		}
 
-		return new ProblemInstance(requirements, evals, nused, constraintIDs, N, D, S);
+		Constraints.N = N;
+		Constraints.D = D;
+		Constraints.S = S;
+
+		return new ProblemInstance(requirements, evals, nused, constraintIDs);
 	}
 
-	public static NurseEvaluator convertNurseInfo(Contract contract, ConvertedPattern[] patterns, double[] days_off,
-			double[][] shifts_off, boolean[] skillset, int dayoffset, int[] skillForShift, boolean[] nightShift) {
+	public static NurseEvaluator convertNurseInfo(Contract contract, ConvertedPattern[] patterns, int[] days_off,
+			int[][] shifts_off, boolean[] skillset, int dayoffset, int[] skillForShift, boolean[] nightShift) {
 
 		int nconstr = 15 + patterns.length;
 		ConstraintEvaluator[] constraints = new ConstraintEvaluator[nconstr];
@@ -177,11 +181,12 @@ public class Convert {
 			constraints[7] = new MinConsecutiveWorkingWeekends(target, wknddef);
 			weights[7] = contract.getMinConsecutiveWorkingWeekends_weight();
 		}
+		/* not implemented, because not used in any instance
 		if (contract.getMaxWorkingWeekendsInFourWeeks_on() == 1) {
 			int target = contract.getMaxWorkingWeekendsInFourWeeks();
 			constraints[8] = new MaxWorkingWeekendsInFourWeeks(target, wknddef);
 			weights[8] = contract.getMaxWorkingWeekendsInFourWeeks_weight();
-		}
+		} */
 		if (contract.getCompleteWeekends()) {
 			constraints[9] = new CompleteWeekends(wknddef);
 			weights[9] = contract.getCompleteWeekends_weight();
