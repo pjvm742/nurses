@@ -22,10 +22,15 @@ public class Problem {
 		public int Evaluate(int[] roster) {
 
 		}
-
+		
+		public int ImpactOfChange(int[] roster, )
 	}
 
 	class ProblemInstance {
+		public int N;
+		public int D;
+		public int S;
+
 		public int[][] demands;
 		
 		public NurseEvaluator[] nurses;
@@ -38,6 +43,10 @@ public class Problem {
 			this.nurses = nurses;
 			this.nUsedConstraints = nused;
 			this.constraintIDs = usedConstraints;
+
+			this.N = Constraints.N;
+			this.D = Constraints.D;
+			this.S = Constraints.S;
 		}
 
 		public int EvaluateAll(int[][] solution) {
@@ -48,11 +57,11 @@ public class Problem {
 
 		}
 
-		public void Enforce(int[][] solution, int constraint, int nurse) {
+		public void Enforce(int[][] solution, int nurse, int constraint) {
 
 		}
 		
-		public int Contribution(int[][] solution, int position, int nurse) {
+		public int Contribution(int[][] solution, int nurse, int position) {
 
 		}
 	}
