@@ -29,11 +29,11 @@
 			let $N_{s,d}$ be the set of nurses assigned to shift type $s$ on day $d$ \;
 			let $n_{s,d} = |N_{s,d}|$ \;
 			\While{$\exists s : n_{s,d} > r_{s,d}$}{
-				let $i^* \in N_{s,d}$ be the nurse for whom the assignment contributes the most to soft constraint violations \;
+				let $i^* \in N_{s,d}$ be the nurse for whom removing the assignment will reduce soft constraint violations the most \;
 				$S'_{i^*,d} \gets s_{off}$ \;
 			}
 			\While{$\exists s : n_{s,d} < r_{s,d}$}{
-				let $i^* \in N_{s_{off},d}$ be the nurse for whom assigning $s$ will contribute the least to soft constraint violations \;
+				let $i^* \in N_{s_{off},d}$ be the nurse for whom assigning $s$ will increase soft constraint violations the least \;
 				$S'_{i^*,d} \gets s$ \;
 			}
 		}
