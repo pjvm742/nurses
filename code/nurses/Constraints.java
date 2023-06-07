@@ -1,11 +1,36 @@
 package nurses;
 
 public class Constraints {
+	public static int D;
+	public static int S;
+	public static int N;
 	
 	public abstract class ConstraintEvaluator {
 		public abstract int Evaluate(int[] roster); // determines the number of violations of this constraint in the roster
 		public abstract int Contribution(int[] roster, int position); // determines the number of violations of this constraint that one day is involved in
-		public abstract int[] Enforce(int[] roster); // removes all violations of this constraint
+		public abstract void Enforce(int[] roster); // removes all violations of this constraint (works through side effects)
+
+		public int ImpactOfChange(int[] roster, int index, int newshift) {
+			curshift = roster[index];
+			curval = this.Contribution(roster, index);
+			roster[index] = newshift;
+			newval = this.Contribution(roster, index);
+			roster[index] = curshift;
+
+			return newval - curval;
+		}
+
+		public static int isStartOfWorkingWeekend(int[] roster, int d, WeekendDef w) {
+			if(w.isWeekendStart(d)) {
+				for(int i = 0; i < 4 && d+i < D; i++) {
+					boolean workingWeekend = false;
+					if(isWeekend(d+i) && roster[d+i] != 0) {
+						workingWeekend true;
+					}
+				}
+			}
+
+		}
 	}
 	
 	public class EmptyConstraint extends ConstraintEvaluator {
@@ -775,71 +800,25 @@ public class Constraints {
 		}
 	}
 	
-	public class MaxWeekends4weeks extends ConstraintEvaluator {
-		int max;
-		WeekendDef wknd;
+	// MaxWeekends4weeks: not implemented	
 
-		public MaxWeekends4weeks(int k, WeekendDef w) {
-			this.max = k;
-			this.wknd = w;
+	public class IdenticalShiftsInWeekend extends ConstraintEvaluator {
+		WeekendDef w;
+
+		public IdenticalShiftsInWeekend(int k, WeekendDef w) {
+			this.w = w;
 		}
 		
 		public int Evaluate(int[] roster) {
-			int D = roster.length;
-			int workWeekends = 0;
 			int violation = 0;
 			for (int d = 0; d < D; d++) {
-				int weekday = ( d + dayoffset ) %7;
-				if(weekday = w.start) {
-				  boolean workWeekend = false;
-				  for(int j = 0; j < 28; j += 7) {
-					  for(int i = 0; i < 4; i++) {
-						  if(isWeekend(d+j+i) && roster[d+j+i] > 0) {
-						  workWeekends++;
-						  workWeekend = true;
-						  break;
-						  }
-					  }
-				  workWeekend = false;
-				  }
-				  if(workWeekends > max) {
-					  violation++;
-				  }
-				}
-			}	
-			return violation;
-		}
-
-		public int Contribution(int[] roster, int pos) {
-			int D = roster.length;
-			return 0;
-		}
-
-		public int[] Enforce(int[] origRoster) {
-			
-			return roster;
-		}
-	}
-	
-	public class identicalShiftTypesDuringWeekend extends ConstraintEvaluator {
-		WeekendDef wknd;
-
-		public identicalShiftTypesDuringWeekend(int k, WeekendDef w) {
-			this.wknd = w;
-		}
-		
-		public int Evaluate(int[] roster) {
-			int D = roster.length;
-			int violation = 0;
-			for (int d = 0; d < D; d++) {
-				int weekday = ( d + dayoffset ) %7;
-				if(weekday = w.start) {
-					  for(int i = 0; i < 4; i++) {
-						  if(isWeekend(d+i) && roster[d+i] != roster[d]) {
-						  violation++;
-						  break;
-						  }
-					  }
+				if(w.isWeekendStart(d)) {
+					for(int i = 0; i < 4 && d+i < D; i++) {
+						if(isWeekend(d+i) && roster[d+i] != roster[d]) {
+							violation++;
+							break;
+						}
+					}
 				}
 			}
 				
@@ -847,55 +826,194 @@ public class Constraints {
 		}
 
 		public int Contribution(int[] roster, int pos) {
-			int D = roster.length;
+			int s = roster[pos];
+			for (int d = pos -1; d >= 0 && w.isWeekend(d); d--) {
+				if (roster[d] != s) {
+					return 1;
+				}
+			}
+			for (int d = pos +1; d < D && w.isWeekend(d); d++) {
+				if (roster[d] != s) {
+					return 1;
+				}
+			}
 			return 0;
 		}
 
-		public int[] Enforce(int[] origRoster) {
-			
-			return roster;
+		public void Enforce(int[] roster) {
+			for (int d = 0; d < D; d++) {
+				if(w.isWeekendStart(d)) {
+					for(int i = 0; i < 4 && d+i < D; i++) {
+						if(isWeekend(d+i) ) {
+							roster[d+i] = roster[d];
+						}
+					}
+				}
+			}
 		}
 	}
 	
-	public class noNightShiftBeforeWeekend extends ConstraintEvaluator {
-		WeekendDef wknd;
+	public class NoNightShiftBeforeWeekend extends ConstraintEvaluator {
+		WeekendDef w;
+		boolean[] night;
 
-		public noNightShiftBeforeWeekend(int k, WeekendDef w) {
-			this.wknd = w;
+		public NoNightShiftBeforeWeekend(WeekendDef w, boolean[] night) {
+			this.w = w;
+			this.night = night;
 		}
 		
 		public int Evaluate(int[] roster) {
-			int D = roster.length;
 			int violation = 0;
-			for (int d = 0; d < D; d++) {
-				int weekday = ( d + dayoffset ) %7;
-				if(weekday = w.start) {
-					  for(int i = 0; i < 4; i++) {
-						  boolean workingWeekend = false;
-						  if(isWeekend(d+i) && roster[d+i] != 0) {
-						  workingWeekend true;
-						  }
-						  if(!workingWeekend) {
-							  if(roster[d-1] == NIGHTSHIFTINDEX) {
-								  violation++;
-							  }
-						  }
-					  }
+			for (int d = 1; d < D; d++) {
+				if(w.isWeekendStart(d) && !isStartOfWorkingWeekend(roster, d, w)) {
+					if(night[ roster[d-1] ]) {
+						violation++;
+					}
 				}
+
 			}
-				
 			return violation;
 		}
 
 		public int Contribution(int[] roster, int pos) {
-			int D = roster.length;
+			int s = roster[pos];
+			if (night[s] && pos < D-1 && !isStartOfWorkingWeekend(roster, pos+1, this.w)) {
+				return 1;
+			}
 			return 0;
 		}
 
-		public int[] Enforce(int[] origRoster) {
-			
-			return roster;
+		public void Enforce(int[] roster) {
+			for (int d = 0; d < D; d++) {
+				if (this.Contribution(roster, d) == 1) {
+					roster[d] = 0;
+				}
+			}
 		}
 	}
 	
+	public class UnwantedPattern extends ConstraintEvaluator {
+		int[] shifts;
+		int[] days;
+		int size;
+		int offset;
+
+		public UnwantedPattern(int[] shiftTypes, int[] weekdays, dayoffset) {
+			this.shifts = shiftTypes;
+			this.days = weekdays;
+			this.size = weekdays.length;
+			this.offset = dayoffset;
+		}
+
+		int evaluateAt(int[] roster, int pos) {
+			if (pos > D - size) {
+				return 0;
+			}
+			for (int i = 0; i < size; i++) {
+				j = pos+i;
+				if (days[i] != 7 && days[i] != (j + offset) % 7) {
+					return 0;
+				}
+				if (shifts[i] < S && roster[j] != shifts[i]) {
+					return 0;
+				}
+				if (shifts[i] == S && roster[j] == 0) {
+					return 0;
+				}
+			}
+			return 1;
+		}
+
+		public int Evaluate(int[] roster) {
+			int violations = 0;
+			for (int d = 0; d < D-size+1; d++) {
+				violations += evaluateAt(d);
+			}
+			return violations;
+		}
+
+		public int Contribution(int[] roster, int pos) {
+			int violations = 0;
+			for (int d = pos; d >= 0 && d > pos - size; d--) {
+				violations += evaluateAt(d);
+			}
+			return violations;
+		}
+
+		public void Enforce(int[] roster) {
+			for (int d = 0; d < D-size+1; d++) {
+				if (evaluateAt(d) > 0) {
+					if (roster[d] == 0) {
+						roster[d] = ChooseShiftType();
+					} else {
+						roster[d] = 0;
+					}
+				}
+			}
+		}
+	}
+
+	public class DayOffRequests extends ConstraintEvaluator {
+		int[] req;
+
+		public DayOffRequests(int[] days_off) {
+			this.req = days_off;
+		}
+
+		public int Evaluate(int[] roster) {
+			int violations;
+			for (int d = 0; d < D; d++) {
+				violations += Contribution(roster, d);
+			}
+			return violations;
+		}
+
+		public int Contribution(int[] roster, int pos) {
+			if (roster[pos] > 0) {
+				return req[pos];
+			}
+			return 0;
+		}
+
+		public void Enforce(int[] roster) {
+			for (int d = 0; d < D; d++) {
+				if (Contribution(roster,d) > 0) {
+					roster[d] = 0;
+				}
+			}
+		}
+	}
+
+	public class ShiftOffRequests extends ConstraintEvaluator {
+		int[][] req;
+
+		public ShiftOffRequests(int[][] shifts_off) {
+			this.req = shifts_off;
+		}
+
+		public int Evaluate(int[] roster) {
+			int violations;
+			for (int d = 0; d < D; d++) {
+				violations += Contribution(roster, d);
+			}
+			return violations;
+		}
+
+		public int Contribution(int[] roster, int pos) {
+			int s = roster[pos];
+			if (s > 0) {
+				return req[pos][s];
+			}
+			return 0;
+		}
+
+		public void Enforce(int[] roster) {
+			for (int d = 0; d < D; d++) {
+				if (Contribution(roster,d) > 0) {
+					roster[d] = 0;
+				}
+			}
+		}
+	}
+
 }

@@ -11,7 +11,7 @@ public class Problem {
 			this.weights = weights;
 		}
 
-		public int[] Enforce(int[] roster, int constraint) {
+		public void Enforce(int[] roster, int constraint) {
 
 		}
 		
@@ -26,21 +26,13 @@ public class Problem {
 	}
 
 	class ProblemInstance {
-		public int N; // number of nurses
-		public int D; // number of days
-		public int S; // number of shift types
-
 		public int[][] demands;
 		
 		public NurseEvaluator[] nurses;
 		public int nUsedConstraints;
 		public int[] constraintIDs;
 
-		public ProblemInstance(int[][] demands, NurseEvaluator[] nurses, int nused, int[] usedConstraints, int N, int D, int S) {
-			this.N = N;
-			this.D = D;
-			this.S = S;
-
+		public ProblemInstance(int[][] demands, NurseEvaluator[] nurses, int nused, int[] usedConstraints) {
 			this.demands = demands;
 
 			this.nurses = nurses;
@@ -48,15 +40,19 @@ public class Problem {
 			this.constraintIDs = usedConstraints;
 		}
 
-		public int Evaluate(int[] roster, int nurse) {
+		public int EvaluateAll(int[][] solution) {
+			
+		}
+
+		public int Evaluate(int[][] solution, int nurse) {
 
 		}
 
-		public int[] Enforce(int constraint, int nurse) {
+		public void Enforce(int[][] solution, int constraint, int nurse) {
 
 		}
 		
-		public int Contribution(int[] roster, int position, int nurse) {
+		public int Contribution(int[][] solution, int position, int nurse) {
 
 		}
 	}
@@ -64,10 +60,12 @@ public class Problem {
 	class WeekendDef {
 		int start;
 		int end;
+		int dayoffset;
 		
-		public WeekendDef(int start, int end) {
+		public WeekendDef(int start, int end, int dayoffset) {
 			this.start = start;
 			this.end = end;
+			this.dayoffset = dayoffset;
 		}
 		
 		public boolean isWeekend(int day) {
@@ -80,6 +78,11 @@ public class Problem {
 			}
 			return false;
 			
+		}
+
+		public boolean isWeekendStart(int day) {
+			int weekday = (day + dayoffset ) % 7;
+			return weekday == start || ( day == 0 && this.isWeekend(day) );
 		}
 	}
 
