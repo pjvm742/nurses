@@ -22,7 +22,7 @@ public class Constraints {
 
 		public static int isStartOfWorkingWeekend(int[] roster, int d, WeekendDef w) {
 			if(w.isWeekendStart(d)) {
-				for(int i = 0; i < 4 && d+i < D; i++) {
+				for(int i = 0; i < 4 && d+i < D; i++) { // max weekend length is equal to 4 days
 					boolean workingWeekend = false;
 					if(isWeekend(d+i) && roster[d+i] != 0) {
 						workingWeekend true;
@@ -40,8 +40,7 @@ public class Constraints {
 		public int Contribution(int[] roster, int positition) {
 			return 0;
 		}
-		public int[] Enforce(int[] roster) {
-			return roster;
+		public void Enforce(int[] roster) {
 		}
 	}
 
@@ -53,7 +52,6 @@ public class Constraints {
 		}
 		
 		public int Evaluate(int[] roster) {
-			int D = roster.length;
 			int nseq = 0;
 			int violation = 0;
 			for (int d = 0; d < D; d++) {
@@ -73,7 +71,6 @@ public class Constraints {
 		}
 
 		public int Contribution(int[] roster, int pos) {
-			int D = roster.length;
 			if (roster[pos] > 0) {
 				int start = pos;
 				int end = pos;
@@ -97,13 +94,8 @@ public class Constraints {
 			return 0;
 		}
 
-		public int[] Enforce(int[] origRoster) {
-			int D = origRoster.length;
-			int[] roster = new int[D];
+		public void Enforce(int[] roster) {
 			int nseq = 0;
-			for (int d = 0; d < D; d++) {
-				roster[d] = origRoster[d];
-			}
 			for (int d = 0; d < D; d++) {
 				if (roster[d] > 0) {
 					nseq++;
@@ -115,82 +107,73 @@ public class Constraints {
 					nseq = 0;
 				}
 			}
-			return roster;
 		}
 	}
 	
 	public class MinConsecutiveWorking extends ConstraintEvaluator {
-	int min;
+		int min;
 	
-	public MinConsecutiveWorking(int k) {
-		this.min = k;
-	}
+		public MinConsecutiveWorking(int k) {
+			this.min = k;
+		}
 
-	public int Evaluate(int[] roster) {
-		int D = roster.length;
-		int violation = 0;
-		int nseq = 0;
-		for (int d = 0; d < D; d++) {
-			if (roster[d] > 0) {
-				nseq++;
-			} else {
-				if(nseq < min) {
+		public int Evaluate(int[] roster) {
+			int violation = 0;
+			int nseq = 0;
+			for (int d = 0; d < D; d++) {
+				if (roster[d] > 0) {
+					nseq++;
+				} else if(nseq < min) {
+					violation += min - nseq;
+				        nseq = 0;
+				}
+			}
+			if(nseq < min) {
 				violation += min - nseq;
-			            nseq = 0;
-				}	
+			        nseq = 0;
 			}
+
+			return violation;
 		}
-		if(nseq < min) {
-			violation += min - nseq;
-		            nseq = 0;
-		}
-		
-		return violation;
-	}
 	
-	public int Contribution(int[] roster, int pos) {
-		int D = roster.length;
-		if (roster[pos] > 0) {
-			int start = pos;
-			int end = pos;
-			for (; start > 0; start--) {
-				if (roster[start-1] == 0) {
-					break;
+		public int Contribution(int[] roster, int pos) {
+			if (roster[pos] > 0) {
+				int start = pos;
+				int end = pos;
+				for (; start > 0; start--) {
+					if (roster[start-1] == 0) {
+						break;
+					}
 				}
-			}
-			for (; end < D-1; end++) {
-				if (roster[end+1] == 0) {
-					break;
+				for (; end < D-1; end++) {
+					if (roster[end+1] == 0) {
+						break;
+					}
 				}
+				int length = end - start + 1;
+				if (length < min) {
+					return 1;
+				}
+			} else {
+				return 0;
 			}
-			int length = end - start + 1;
-			if (length < min) {
-				return 1;
-			}
-		} else {
 			return 0;
 		}
-		return 0;
-	}
-	
-	public int[] Enforce(int[] origRoster) {
-		int D = origRoster.length;
-		int[] roster = new int[D];
-		int nseq = 0;
-		for (int d = 0; d < D; d++) {
-			roster[d] = origRoster[d];
+
+		public void Enforce(int[] roster) {
+			int nseq = 0;
+			for (int d = 0; d < D; d++) {
+				if (roster[d] > 0) {
+					nseq++;
+				} else if(nseq < min){
+					roster[d] = ChooseShiftType();
+					nseq++;
+				} else {
+					nseq = 0;
+				}
+			}
+			return roster;
 		}
-		for (int d = 0; d < D; d++) {
-			if (roster[d] > 0) {
-				nseq++;
-			} else if(nseq < min){
-				roster[d] = randomAssign(); // assign random shift method
-				nseq++;
-			  }
-			nseq = 0;
-		}
-		return roster;
-	}
 	}
 	
 	public class maxTotalAssign extends ConstraintEvaluator {
@@ -201,7 +184,6 @@ public class Constraints {
 		}
 		
 		public int Evaluate(int[] roster) {
-			int D = roster.length;
 			int total = 0;
 			int violation = 0;
 			for (int d = 0; d < D; d++) {
@@ -220,39 +202,30 @@ public class Constraints {
 			if(violationValue > 0 && roster[pos] > 0) {
 				return 1;
 			}
-				return 0;
+			return 0;
 			
 		}
 
-		public int[] Enforce(int[] origRoster) {
-			int D = origRoster.length;
-			int[] roster = new int[D];
+		public void Enforce(int[] roster) {
 			int violationValue = Evaluate(roster);
-			double violationValueDouble = (double) violationValue;
-			int totalFreeDays = 0;
+			int totalWorkingDays = 0;
 			for (int d = 0; d < D; d++) {
-				if(origRoster[d] > 0) {
-					totalFreeDays++;
+				if(roster[d] > 0) {
+					totalWorkingDays++;
 				}
 			}
-			int stepValue = (int) (totalFreeDays/violationValueDouble);
-			for (int d = 0; d < D; d++) {
-				roster[d] = origRoster[d];
-			}
-			for (int d = 0; d < D; d++) {
-				int counter = 0;
+			int stepValue = (int) ((double) totalWorkingDays / (double) violationValue);
+			int counter = 0;
+			for (int d = 0; d < D && violationValue > 0; d++) {
 				if(roster[d] > 0) {
 					counter++;
 					if(counter == stepValue) {
-						if(violationValue > 0) {
 						roster[d] = 0;
 						violationValue--;
 						counter = 0;
-						}
 					}
 				}
 			}
-			return roster;
 		}
 	}
 	
@@ -264,7 +237,6 @@ public class Constraints {
 		}
 		
 		public int Evaluate(int[] roster) {
-			int D = roster.length;
 			int total = 0;
 			int violation = 0;
 			for (int d = 0; d < D; d++) {
@@ -283,38 +255,29 @@ public class Constraints {
 			if(violationValue > 0 && roster[pos] == 0) {
 				return 1;
 			}
-				return 0;
+			return 0;
 			
 		}
 
-		public int[] Enforce(int[] origRoster) {
-			int D = origRoster.length;
-			int[] roster = new int[D];
+		public void Enforce(int[] roster) {
 			int violationValue = Evaluate(roster);
-			double violationValueDouble = (double) violationValue;
-			int totalAssignments = 0;
+			int totalFreeDays = 0;
 			for (int d = 0; d < D; d++) {
-				if(origRoster[d] > 0) {
-					totalAssignments++;
+				if(roster[d] == 0) {
+					totalFreeDays++;
 				}
 			}
-			int stepValue = (int) (totalAssignments/violationValueDouble);
-			for (int d = 0; d < D; d++) {
-				roster[d] = origRoster[d];
-			}
-			for (int d = 0; d < D; d++) {
+			int stepValue = (int) ((double) totalFreeDays / (double) violationValue);
+			for (int d = 0; d < D && violationValue > 0; d++) {
 				int counter = 0;
 				if(roster[d] == 0) {
 					counter++;
 					if(counter == stepValue) {
-						if(violationValue > 0) {
-						roster[d] = randomAssign();
+						roster[d] = ChooseShiftType();
 						counter = 0;
-						}
 					}
 				}
 			}
-			return roster;
 		}
 	}
 	
@@ -326,7 +289,6 @@ public class Constraints {
 		}
 		
 		public int Evaluate(int[] roster) {
-			int D = roster.length;
 			int nseq = 0;
 			int violation = 0;
 			for (int d = 0; d < D; d++) {
@@ -346,7 +308,6 @@ public class Constraints {
 		}
 
 		public int Contribution(int[] roster, int pos) {
-			int D = roster.length;
 			if (roster[pos] == 0) {
 				int start = pos;
 				int end = pos;
@@ -370,22 +331,18 @@ public class Constraints {
 			return 0;
 		}
 
-		public int[] Enforce(int[] origRoster) {
-			int D = origRoster.length;
-			int[] roster = new int[D];
+		public void Enforce(int[] roster) {
 			int nseq = 0;
-			for (int d = 0; d < D; d++) {
-				roster[d] = origRoster[d];
-			}
 			for (int d = 0; d < D; d++) {
 				if(roster[d] == 0) {
 					nseq++;
 					if(nseq > max) {
-						roster[d] = randomAssign();
+						roster[d] = ChooseShiftType();
 						nseq = 0;
 					}
+				} else {
+					nseq = 0;
 				}
-				nseq = 0;
 			}
 			return roster;
 		}
@@ -399,28 +356,25 @@ public class Constraints {
 		}
 
 		public int Evaluate(int[] roster) {
-			int D = roster.length;
 			int violation = 0;
 			int nseq = 0;
 			for (int d = 0; d < D; d++) {
 				if (roster[d] == 0) {
 					nseq++;
-				}else if(nseq < min) {
+				} else if (nseq < min) {
 					violation += min - nseq;
-				            nseq = 0;
-						
-					}
+					nseq = 0;
 				}
+			}
 			if(nseq < min) {
 				violation += min - nseq;
-			            nseq = 0;
+			        nseq = 0;
 			}
 			
 			return violation;
 		}
 		
 		public int Contribution(int[] roster, int pos) {
-			int D = roster.length;
 			if (roster[pos] == 0) {
 				int start = pos;
 				int end = pos;
@@ -444,359 +398,236 @@ public class Constraints {
 			return 0;
 		}
 		
-		public int[] Enforce(int[] origRoster) {
-			int D = origRoster.length;
-			int[] roster = new int[D];
+		public void Enforce(int[] roster) {
 			int nseq = 0;
-			for (int d = 0; d < D; d++) {
-				roster[d] = origRoster[d];
-			}
 			for (int d = 0; d < D; d++) {
 				if(roster[d] == 0) {
 					nseq++;
+				} else if (nseq < min) {
+					roster[d] = 0;
+					nseq++;
+				} else {
+					nseq = 0;
 				}
-				else if (nseq < min) {
-						roster[d] = 0;
-						nseq++;
-					}
-				nseq = 0;
-				} 
-			
-			return roster;
+			}
 		}
 
 	}
 	
 	public class CompleteWeekends extends ConstraintEvaluator {
-		WeekendDef wknd;
+		WeekendDef w;
 
 		public CompleteWeekends(WeekendDef w) {
-			this.wknd = w;
+			this.w = w;
 		}
 		
-		public int Evaluate(int[] roster) {
-			int D = roster.length;
-			int violation = 0;
-			for (int d = 0; d < D; d++) {
-				int weekday = ( d + dayoffset ) %7;
-				if(weekday = w.start) {
-					if(roster[d] > 0) {
-						for(int i = 1; i < 4; i++) {                //max weekend length is equal to 4 days
-							if(isWeekend(d+i) && roster[d+i] == 0) {
-									violation++;
-									break;
-							}
-						}
-					}
-					else {
-						for(int i = 1; i < 4; i++) { 
-							if(isWeekend(d+i) && roster[d+i] > 0) {
-									violation++;
-									break;
-							}
-						}
+		int evaluateAt(int[] roster, int pos) {
+			if(isStartOfWorkingWeekend(roster, d, w)) {
+				for (int i = 0; d+i < D && w.isWeekend(d+i); i++) {
+					if (roster[d+i] == 0) {
+						return 1;
 					}
 				}
-					
+			}
+			return 0;
+		}
+
+		public int Evaluate(int[] roster) {
+			int violation = 0;
+			for (int d = 0; d < D; d++) {
+				violation += evaluateAt(roster, d);			
 			}
 			return violation;
 		}
 
 		public int Contribution(int[] roster, int pos) {
-			int D = roster.length;
-			if (isWeekend(pos) && roster[pos] > 0) {
-				for(int i = 1; i < 4; i++) {                             
-					if(isWeekend(pos-i) && roster[pos-i] == 0) {
-						return 1;
-					}
-				}
-				for(int i = 1; i < 4; i++) {
-					if(isWeekend(pos+i) && roster[pos+i] == 0) {
-						return 1;
-					}
-			    }
-			}
-			else if(isWeekend(pos) && roster[pos] == 0) {
-				for(int i = 1; i < 4; i++) {                             
-					if (isWeekend(pos-i) && roster[pos-i] > 0) {
-						return 1;
-					}
-				}
-				for(int i = 1; i < 4; i++) {
-					if(isWeekend(pos+i) && roster[pos+i] > 0) {
-						return 1;
-					}
-			    }
+			if (w.isWeekend(pos)) {
+				int start = w.findStart(pos);
+				return evaluateAt(roster, start);
 			}
 			return 0;
 		}
 		
-		public int[] Enforce(int[] origRoster) {
-			int D = origRoster.length;
-			int[] roster = new int[D];
+		public void Enforce(int[] roster) {
 			int nseq = 0;
 			for (int d = 0; d < D; d++) {
-				roster[d] = origRoster[d];
-			}
-			for (int d = 0; d < D; d++) {
-				if(isWeekend(d) && roster[d] > 0) {
-					for(int i = 1; i < 4; i++) {
-						if(isWeekend(d+i) && roster[d+i] == 0) {
-							roster[d+i] = randomAssign();
-						}
-						if(isWeekend(d-i) && roster[d-i] == 0) {
-							roster[d-i] = randomAssign();
+				if (isStartOfWorkingWeekend(roster, d, w)) {
+					for (int i = 0; d + i < D && w.isWeekend(d+i) {
+						if (roster[d+i] == 0) {
+							roster[d+i] = ChooseShiftType();
 						}
 					}
 				}
 			}
-			return roster;
 		}
 	}
 	
 	public class MaxConsecutiveWorkingWeekends extends ConstraintEvaluator {
 		int max;
-		WeekendDef wknd;
+		WeekendDef w;
 
 		public MaxConsecutiveWorkingWeekends(int k, WeekendDef w) {
 			this.max = k;
-			this.wknd = w;
+			this.w = w;
 		}
 		
 		public int Evaluate(int[] roster) {
-			int D = roster.length;
 			int nseq = 0;
 			int violation = 0;
 			for (int d = 0; d < D; d++) {
-				int weekday = ( d + dayoffset ) %7;
-				if(weekday = w.start) {
-				  boolean workWeekend = false;
-				  for(int i = 0; i < 4; i++) {
-					  if(isWeekend(d+i) && roster[d+i] > 0) {
-						  nseq++;
-						  workWeekend = true;
-						  break;
-					  }
-					  else if(!workWeekend) {
-						  if(nseq > max) {
-							  violation++;
-						  }
-						  nseq = 0;
-					  }
-				  }
-				  workWeekend = false;
+				if (w.isWeekendStart(d)) {
+					if (isStartOfWorkingWeekend()) {
+						nseq++;
+					} else {
+						if (nseq > max) {
+							violation += nseq - max;
+						}
+						nseq = 0;
+					}
 				}
 			}
-				
+			if (nseq > max) {
+				violation += nseq - max;
+			}
 			return violation;
 		}
 
 		public int Contribution(int[] roster, int pos) {
-			int D = roster.length;
-			int consecWorkingWeekends = 0;
-			if(isWeekend(pos)){
-				for(int j = pos; j > 0; j -= 7) {
-					boolean isConsecutiveWeekendsWorking = false;
-					for(int i = 0; i < 4; i++) {
-						if(isWeekend(j+i) && roster[j+i] > 0) {
-							consecWorkingWeekends++;
-							isConsecutiveWeekendsWorking = true;
-							break;
-						}
-						if(isWeekend(j-i) && roster[j-i] > 0) {
-							consecWorkingWeekends++;
-							isConsecutiveWeekendsWorking = true;
-							break;
-						}
-					}
-					if(!isConsecutiveWeekendsWorking) {
-						if(consecWorkingWeekends > max) {
-							return 1;
-						}
-					}
-				}
-				consecWorkingWeekends = 0;
-					for(int j = pos; j < D-1; j += 7) {
-						boolean isConsecutiveWeekendsWorking = false;
-						for(int i = 0; i < 4; i++) {
-							if(isWeekend(j+i) && roster[j+i] > 0) {
-								consecWorkingWeekends++;
-								isConsecutiveWeekendsWorking = true;
-								break;
-							}
-							if(isWeekend(j-i) && roster[j-i] > 0) {
-								consecWorkingWeekends++;
-								isConsecutiveWeekendsWorking = true;
-								break;
-							}
-						}
-						if(!isConsecutiveWeekendsWorking) {
-							if(consecWorkingWeekends > max) {
-								return 1;
-							}
-						}
-					}
+			if (!w.isWeekend(pos)) {
+				return 0;
 			}
-			
+			int nConseq = 0;
+			int start = w.findStart(pos);
+			if (isStartOfWorkingWeekend(roster, start, w)) {
+				nConseq = 1;
+			} else {
+				return 0;
+			}
+			for (int j = start - 7; ; j -= 7) {
+				if (j > 0) {
+					if (isStartOfWorkingWeekend(roster, j, w)) {
+						nConseq++;
+					} else {
+						break;
+					}
+				} else {
+					j = 0;
+					if (isStartOfWorkingWeekend(roster, j, w)) {
+						nConseq++;
+					}
+					break;
+				}
+			}
+			for (int j = start + 7; j < D && isStartOfWorkingWeekend(roster, j, w); j += 7) {
+				nConseq++;
+			}
+			if (nConseq > max) {
+				return nConseq - max;
+			}
 			return 0;
 		}
 
-		public int[] Enforce(int[] origRoster) {
-			int D = origRoster.length;
-			int[] roster = new int[D];
-			int nseq = 0;
+		public void Enforce(int[] roster) {
+			int nseq
 			for (int d = 0; d < D; d++) {
-				roster[d] = origRoster[d];
-			}
-			for (int d = 0; d < D; d++) {
-				int weekday = ( d + dayoffset ) %7;
-				if(weekday = w.start) {
-					boolean workingWeekend = false;
-					for(int i = 0; i < 4; i++) {
-						if(isWeekend(d+i) && roster[d+i] > 0) {
-							  workingWeekend = true;
-							  break;
+				if (w.isWeekendStart(d)) {
+					if (isStartOfWorkingWeekend()) {
+						nseq++;
+						if (nseq > max) {
+							for (int i = 0; d+i < D && w.isWeekend(d+i)) {
+								roster[d+i] = 0;
+							}
+							nseq = 0;
 						}
+					} else {
+						nseq = 0;
 					}
-					if(workingWeekend) {
-						  nseq++;
-						  if(nseq > max) {
-							  for(int i = 0; i < 4; i++) {
-									if(isWeekend(d+i) && roster[d+i] > 0) {
-										roster[d+i] = 0;
-									}
-							  }
-						  }
-					}
-					nseq = 0;
 				}
 			}
-			return roster;
-			}
+		}
 	}
 	
 	public class MinConsecutiveWorkingWeekends extends ConstraintEvaluator {
 		int min;
-		WeekendDef wknd;
+		WeekendDef w;
 
 		public MinConsecutiveWorkingWeekends(int k, WeekendDef w) {
 			this.min = k;
-			this.wknd = w;
+			this.w = w;
 		}
 		
 		public int Evaluate(int[] roster) {
-			int D = roster.length;
 			int nseq = 0;
 			int violation = 0;
 			for (int d = 0; d < D; d++) {
-				int weekday = ( d + dayoffset ) %7;
-				if(weekday = w.start) {
-					boolean workWeekend = false;
-				  for(int i = 0; i < 4; i++) {
-					  if(isWeekend(d+i) && roster[d+i] > 0) {
-						  nseq++;
-						  workWeekend = true;
-					  }
-					  else if(!workWeekend) {
-						  if(nseq < min) {
-							  violation++;
-						  }
-						  nseq = 0;
-					  }
-				  }
-				  workWeekend = false;
+				if (w.isWeekendStart(d)) {
+					if (isStartOfWorkingWeekend()) {
+						nseq++;
+					} else {
+						if (nseq < min) {
+							violation += min - nseq;
+						}
+						nseq = 0;
+					}
 				}
 			}
-				
+			if (nseq < min) {
+				violation += min - nConseq;
+			}
 			return violation;
 		}
 
 		public int Contribution(int[] roster, int pos) {
-			int D = roster.length;
-			int consecWorkingWeekends = 0;
-			if(isWeekend(pos)){
-				for(int j = pos; j > 0; j -= 7) {
-					boolean isConsecutiveWeekendsWorking = false;
-					for(int i = 0; i < 4; i++) {
-						if(isWeekend(j+i) && roster[j+i] > 0) {
-							consecWorkingWeekends++;
-							isConsecutiveWeekendsWorking = true;
-							break;
-						}
-						if(isWeekend(j-i) && roster[j-i] > 0) {
-							consecWorkingWeekends++;
-							isConsecutiveWeekendsWorking = true;
-							break;
-						}
-					}
-					if(!isConsecutiveWeekendsWorking) {
-						if(consecWorkingWeekends < min) {
-							return 1;
-						}
-					}
-				}
-				consecWorkingWeekends = 0;
-					for(int j = pos; j < D-1; j += 7) {
-						boolean isConsecutiveWeekendsWorking = false;
-						for(int i = 0; i < 4; i++) {
-							if(isWeekend(j+i) && roster[j+i] > 0) {
-								consecWorkingWeekends++;
-								isConsecutiveWeekendsWorking = true;
-								break;
-							}
-							if(isWeekend(j-i) && roster[j-i] > 0) {
-								consecWorkingWeekends++;
-								isConsecutiveWeekendsWorking = true;
-								break;
-							}
-						}
-						if(!isConsecutiveWeekendsWorking) {
-							if(consecWorkingWeekends < min) {
-								return 1;
-							}
-						}
-					}
+			if (!w.isWeekend(pos)) {
+				return 0;
 			}
-			
+			int nConseq = 0;
+			int start = w.findStart(pos);
+			if (isStartOfWorkingWeekend(roster, start, w)) {
+				nConseq = 1;
+			} else {
+				return 0;
+			}
+			for (int j = start - 7; ; j -= 7) {
+				if (j > 0) {
+					if (isStartOfWorkingWeekend(roster, j, w)) {
+						nConseq++;
+					} else {
+						break;
+					}
+				} else {
+					j = 0;
+					if (isStartOfWorkingWeekend(roster, j, w)) {
+						nConseq++;
+					}
+					break;
+				}
+			}
+			for (int j = start + 7; j < D && isStartOfWorkingWeekend(roster, j, w); j += 7) {
+				nConseq++;
+			}
+			if (nConseq < min) {
+				return min - nConseq;
+			}
 			return 0;
 		}
 
-
 		public int[] Enforce(int[] origRoster) {
-			int D = origRoster.length;
-			int[] roster = new int[D];
-			int nseq = 0;
+			int nseq
 			for (int d = 0; d < D; d++) {
-				roster[d] = origRoster[d];
-			}
-			for (int d = 0; d < D; d++) {
-				int weekday = ( d + dayoffset ) %7;
-				if(weekday = w.start) {
-					boolean workingWeekend = false;
-					for(int i = 0; i < 4; i++) {
-						if(isWeekend(d+i) && roster[d+i] > 0) {
-							  workingWeekend = true;
-							  break;
+				if (w.isWeekendStart(d)) {
+					if (isStartOfWorkingWeekend()) {
+						nseq++;
+					} else {
+						if (nseq < min) {
+							roster[d] = ChooseShiftType();
+							nseq++;
+						} else {
+							nseq = 0;
 						}
 					}
-					if(workingWeekend) {
-						  nseq++;
-					}
-					if(!workingWeekend) {
-						if(nseq > 0 && nseq < min) {
-							for(int i = 0; i < 4; i++) {
-								if(isWeekend(d+i) && roster[d+i] == 0) {
-									roster[d+i] = randomAssign();
-									nseq++;
-									break;
-								}
-							}
-						}
-					}
-					
 				}
 			}
-			return roster;
 		}
 	}
 	

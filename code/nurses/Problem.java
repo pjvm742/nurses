@@ -84,6 +84,21 @@ public class Problem {
 			int weekday = (day + dayoffset ) % 7;
 			return weekday == start || ( day == 0 && this.isWeekend(day) );
 		}
+
+		public int findStart(int day) {
+			for (int d = day; ; d--) {
+				if (d == 0) {
+					if (isWeekend(0)) {
+						return 0;
+					} else {
+						return -1;
+					}
+				}
+				if (isWeekendStart(d)) {
+					return d;
+				}
+			}
+		}
 	}
 
 }
