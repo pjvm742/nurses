@@ -1,5 +1,7 @@
 package nurses;
 
+import java.util.Random;
+
 public class Constraints {
 	public static int D;
 	public static int S;
@@ -18,6 +20,11 @@ public class Constraints {
 			roster[index] = curshift;
 
 			return newval - curval;
+		}
+
+		public int ChooseShiftType() {
+			Random r = new Random();
+			return r.nextInt(S);
 		}
 
 		public static int isStartOfWorkingWeekend(int[] roster, int d, WeekendDef w) {
@@ -154,6 +161,9 @@ public class Constraints {
 				if (length < min) {
 					return 1;
 				}
+			} else {
+				return 0;
+			}
 			} else {
 				return 0;
 			}
@@ -677,9 +687,6 @@ public class Constraints {
 					for(int i = 0; i < 4 && d+i < D; i++) {
 						if(isWeekend(d+i) ) {
 							roster[d+i] = roster[d];
-						}
-					}
-				}
 			}
 		}
 	}

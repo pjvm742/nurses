@@ -329,4 +329,30 @@ public class Convert {
 			return 7; // Any
 		}
 	}
+
+	public WeekendDef convertWeekend(List<Day> dayList, int dayoffset) {
+		int ndays = dayList.size();
+		boolean weekend = new boolean[7];
+		for (int d = 0; d < ndays; d++) {
+			int day = convertWeekday(dayList.get(d));
+			weekend[day] = true;
+		}
+		int start = -1;
+		int end = -1;
+		boolean started = false;
+		for (int i = 0; d < 7; d++) {
+			int d = (i + 2) % 7;
+			if (!started && weekend[d]) {
+				start = d;
+				started = true;
+			}
+			d1 = (i + 3) % 7;
+			if (started && !weekend[d1]) {
+				end = d;
+				started = false;
+				break;
+			}
+		}
+		return new WeekendDef(start, end, dayoffset);
+	}
 }

@@ -11,19 +11,27 @@ public class Problem {
 			this.weights = weights;
 		}
 
-		public void Enforce(int[] roster, int constraint) {
-
-		}
-		
-		public int Contribution(int[] roster, int position) {
-
-		}
-
+			
 		public int Evaluate(int[] roster) {
-
+			int sum = 0;
+			for (int c = 0; c < constraints.length; c++) {
+				sum += constraints[c].Evaluate(roster) * weights[c];
+			}
+			return sum;
 		}
+
+		public void Enforce(int[] roster, int c) {
+			constraints[c].Enforce(roster);
+		}
+	
+		public int ImpactOfChange(int[] roster, int position, int shift) {
+			int sum = 0;
+			for (int c = 0; c < constraints.length; c++) {
+				sum += constraints[c].ImpactOfChange(roster, position, shift) * weights[c];
+			}
+			return sum;
 		
-		public int ImpactOfChange(int[] roster, )
+		}
 	}
 
 	class ProblemInstance {
@@ -50,19 +58,24 @@ public class Problem {
 		}
 
 		public int EvaluateAll(int[][] solution) {
-			
+			int sum = 0;
+			for (int i = 0; i < N; i++) {
+				sum += nurses[i].Evaluate(solution[i]);
+			}
+			return sum;
 		}
 
 		public int Evaluate(int[][] solution, int nurse) {
-
+			return nurses[nurse].Evaluate(solution[nurse]);
 		}
 
 		public void Enforce(int[][] solution, int nurse, int constraint) {
-
+			c = constraintIDs[constraint];
+			return nurses[nurse].Enforce(solution[nurse], c);
 		}
-		
-		public int Contribution(int[][] solution, int nurse, int position) {
-
+			
+		public int ImpactOfChange(int[][] solution, int nurse, int position, int shift) {
+			return nurses[nurse].ImpactOfChange(solution[nurse], position, shift);
 		}
 	}
 
