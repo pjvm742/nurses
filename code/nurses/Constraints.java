@@ -6,6 +6,16 @@ public class Constraints {
 		public abstract int Evaluate(int[] roster); // determines the number of violations of this constraint in the roster
 		public abstract int Contribution(int[] roster, int position); // determines the number of violations of this constraint that one day is involved in
 		public abstract int[] Enforce(int[] roster); // removes all violations of this constraint
+
+		public int ImpactOfChange(int[] roster, int index, int newshift) {
+			curshift = roster[index];
+			curval = this.Contribution(roster, index);
+			roster[index] = newshift;
+			newval = this.Contribution(roster, index);
+			roster[index] = curshift;
+
+			return newval - curval;
+		}
 	}
 	
 	public class EmptyConstraint extends ConstraintEvaluator {
