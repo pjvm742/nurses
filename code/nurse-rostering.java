@@ -1,8 +1,21 @@
 import java.util.Collections;
 import java.util.Arrays;
 import nurses.*;
+import Helper.XMLParser;
+import Attributes.SchedulingPeriod;
 
 public class NurseSolver {
+
+	public static void main(String[] args) {
+		String filename = args[1];
+
+		XMLParser parser = new XMLParser(filename);
+		SchedulingPeriod sp = parser.parseXML();
+		ProblemInstance p = convertProblem(sp);
+
+		int[][] finalsol = algorithm(p, 10000, 20);
+		System.out.println(p.EvaluateAll(finalsol));
+	}
 
 	public int[][] algorithm(ProblemInstance p, long timelimit, int stucklimit) {
 		long startT = System.currentTimeMillis();
