@@ -13,10 +13,10 @@ public class Constraints {
 		public abstract void Enforce(int[] roster); // removes all violations of this constraint (works through side effects)
 
 		public int ImpactOfChange(int[] roster, int index, int newshift) {
-			curshift = roster[index];
-			curval = this.Contribution(roster, index);
+			int curshift = roster[index];
+			int curval = this.Contribution(roster, index);
 			roster[index] = newshift;
-			newval = this.Contribution(roster, index);
+			int newval = this.Contribution(roster, index);
 			roster[index] = curshift;
 
 			return newval - curval;
@@ -27,12 +27,12 @@ public class Constraints {
 			return r.nextInt(S);
 		}
 
-		public static int isStartOfWorkingWeekend(int[] roster, int d, WeekendDef w) {
+		public static int isStartOfWorkingWeekend(int[] roster, int d, Problem.WeekendDef w) {
 			if(w.isWeekendStart(d)) {
 				for(int i = 0; i < 4 && d+i < D; i++) { // max weekend length is equal to 4 days
 					boolean workingWeekend = false;
-					if(isWeekend(d+i) && roster[d+i] != 0) {
-						workingWeekend true;
+					if(w.isWeekend(d+i) && roster[d+i] != 0) {
+						workingWeekend = true;
 					}
 				}
 			}
@@ -164,9 +164,6 @@ public class Constraints {
 			} else {
 				return 0;
 			}
-			} else {
-				return 0;
-			}
 			return 0;
 		}
 
@@ -182,7 +179,6 @@ public class Constraints {
 					nseq = 0;
 				}
 			}
-			return roster;
 		}
 	}
 	
@@ -354,7 +350,6 @@ public class Constraints {
 					nseq = 0;
 				}
 			}
-			return roster;
 		}
 	}
 		
@@ -425,13 +420,13 @@ public class Constraints {
 	}
 	
 	public class CompleteWeekends extends ConstraintEvaluator {
-		WeekendDef w;
+		Problem.WeekendDef w;
 
-		public CompleteWeekends(WeekendDef w) {
+		public CompleteWeekends(Problem.WeekendDef w) {
 			this.w = w;
 		}
 		
-		int evaluateAt(int[] roster, int pos) {
+		int evaluateAt(int[] roster, int d) {
 			if(isStartOfWorkingWeekend(roster, d, w)) {
 				for (int i = 0; d+i < D && w.isWeekend(d+i); i++) {
 					if (roster[d+i] == 0) {
@@ -462,7 +457,7 @@ public class Constraints {
 			int nseq = 0;
 			for (int d = 0; d < D; d++) {
 				if (isStartOfWorkingWeekend(roster, d, w)) {
-					for (int i = 0; d + i < D && w.isWeekend(d+i) {
+					for (int i = 0; d + i < D && w.isWeekend(d+i); i++) {
 						if (roster[d+i] == 0) {
 							roster[d+i] = ChooseShiftType();
 						}
@@ -474,9 +469,9 @@ public class Constraints {
 	
 	public class MaxConsecutiveWorkingWeekends extends ConstraintEvaluator {
 		int max;
-		WeekendDef w;
+		Problem.WeekendDef w;
 
-		public MaxConsecutiveWorkingWeekends(int k, WeekendDef w) {
+		public MaxConsecutiveWorkingWeekends(int k, Problem.WeekendDef w) {
 			this.max = k;
 			this.w = w;
 		}
@@ -486,7 +481,7 @@ public class Constraints {
 			int violation = 0;
 			for (int d = 0; d < D; d++) {
 				if (w.isWeekendStart(d)) {
-					if (isStartOfWorkingWeekend()) {
+					if (isStartOfWorkingWeekend(roster, d, w)) {
 						nseq++;
 					} else {
 						if (nseq > max) {
@@ -538,13 +533,13 @@ public class Constraints {
 		}
 
 		public void Enforce(int[] roster) {
-			int nseq
+			int nseq;
 			for (int d = 0; d < D; d++) {
 				if (w.isWeekendStart(d)) {
-					if (isStartOfWorkingWeekend()) {
+					if (isStartOfWorkingWeekend(roster, d, w)) {
 						nseq++;
 						if (nseq > max) {
-							for (int i = 0; d+i < D && w.isWeekend(d+i)) {
+							for (int i = 0; d+i < D && w.isWeekend(d+i); i++) {
 								roster[d+i] = 0;
 							}
 							nseq = 0;
@@ -559,9 +554,9 @@ public class Constraints {
 	
 	public class MinConsecutiveWorkingWeekends extends ConstraintEvaluator {
 		int min;
-		WeekendDef w;
+		Problem.WeekendDef w;
 
-		public MinConsecutiveWorkingWeekends(int k, WeekendDef w) {
+		public MinConsecutiveWorkingWeekends(int k, Problem.WeekendDef w) {
 			this.min = k;
 			this.w = w;
 		}
@@ -571,7 +566,7 @@ public class Constraints {
 			int violation = 0;
 			for (int d = 0; d < D; d++) {
 				if (w.isWeekendStart(d)) {
-					if (isStartOfWorkingWeekend()) {
+					if (isStartOfWorkingWeekend(roster, d, w)) {
 						nseq++;
 					} else {
 						if (nseq < min) {
@@ -582,7 +577,7 @@ public class Constraints {
 				}
 			}
 			if (nseq < min) {
-				violation += min - nConseq;
+				violation += min - nseq;
 			}
 			return violation;
 		}
@@ -622,11 +617,11 @@ public class Constraints {
 			return 0;
 		}
 
-		public int[] Enforce(int[] origRoster) {
-			int nseq
+		public void Enforce(int[] roster) {
+			int nseq;
 			for (int d = 0; d < D; d++) {
 				if (w.isWeekendStart(d)) {
-					if (isStartOfWorkingWeekend()) {
+					if (isStartOfWorkingWeekend(roster, d, w)) {
 						nseq++;
 					} else {
 						if (nseq < min) {
@@ -644,9 +639,9 @@ public class Constraints {
 	// MaxWeekends4weeks: not implemented	
 
 	public class IdenticalShiftsInWeekend extends ConstraintEvaluator {
-		WeekendDef w;
+		Problem.WeekendDef w;
 
-		public IdenticalShiftsInWeekend(int k, WeekendDef w) {
+		public IdenticalShiftsInWeekend(int k, Problem.WeekendDef w) {
 			this.w = w;
 		}
 		
@@ -655,7 +650,7 @@ public class Constraints {
 			for (int d = 0; d < D; d++) {
 				if(w.isWeekendStart(d)) {
 					for(int i = 0; i < 4 && d+i < D; i++) {
-						if(isWeekend(d+i) && roster[d+i] != roster[d]) {
+						if(w.isWeekend(d+i) && roster[d+i] != roster[d]) {
 							violation++;
 							break;
 						}
@@ -685,17 +680,20 @@ public class Constraints {
 			for (int d = 0; d < D; d++) {
 				if(w.isWeekendStart(d)) {
 					for(int i = 0; i < 4 && d+i < D; i++) {
-						if(isWeekend(d+i) ) {
+						if(w.isWeekend(d+i) ) {
 							roster[d+i] = roster[d];
+						}
+					}
+				}
 			}
 		}
 	}
 	
 	public class NoNightShiftBeforeWeekend extends ConstraintEvaluator {
-		WeekendDef w;
+		Problem.WeekendDef w;
 		boolean[] night;
 
-		public NoNightShiftBeforeWeekend(WeekendDef w, boolean[] night) {
+		public NoNightShiftBeforeWeekend(Problem.WeekendDef w, boolean[] night) {
 			this.w = w;
 			this.night = night;
 		}
@@ -736,7 +734,7 @@ public class Constraints {
 		int size;
 		int offset;
 
-		public UnwantedPattern(int[] shiftTypes, int[] weekdays, dayoffset) {
+		public UnwantedPattern(int[] shiftTypes, int[] weekdays, int dayoffset) {
 			this.shifts = shiftTypes;
 			this.days = weekdays;
 			this.size = weekdays.length;
@@ -748,7 +746,7 @@ public class Constraints {
 				return 0;
 			}
 			for (int i = 0; i < size; i++) {
-				j = pos+i;
+				int j = pos+i;
 				if (days[i] != 7 && days[i] != (j + offset) % 7) {
 					return 0;
 				}
@@ -765,7 +763,7 @@ public class Constraints {
 		public int Evaluate(int[] roster) {
 			int violations = 0;
 			for (int d = 0; d < D-size+1; d++) {
-				violations += evaluateAt(d);
+				violations += evaluateAt(roster, d);
 			}
 			return violations;
 		}
@@ -773,14 +771,14 @@ public class Constraints {
 		public int Contribution(int[] roster, int pos) {
 			int violations = 0;
 			for (int d = pos; d >= 0 && d > pos - size; d--) {
-				violations += evaluateAt(d);
+				violations += evaluateAt(roster, d);
 			}
 			return violations;
 		}
 
 		public void Enforce(int[] roster) {
 			for (int d = 0; d < D-size+1; d++) {
-				if (evaluateAt(d) > 0) {
+				if (evaluateAt(roster, d) > 0) {
 					if (roster[d] == 0) {
 						roster[d] = ChooseShiftType();
 					} else {

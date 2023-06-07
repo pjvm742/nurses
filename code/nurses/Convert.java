@@ -9,7 +9,7 @@ import Helper.Helper;
 public class Convert {
 
 	public static int[][] convertSolution(List<int[][]> orig) {
-		int D = orig.Length();
+		int D = orig.size();
 		int[][] day = orig.get(0);
 		int S = day.length + 1;
 		int N = day[0].length;
@@ -31,27 +31,27 @@ public class Convert {
 		return sol;
 	}
 
-	public static ProblemInstance convertProblem(SchedulingPeriod s) {
-		Helper h = new Helper(s, new List<[][]int>);
+	public static Problem.ProblemInstance convertProblem(SchedulingPeriod s) {
+		Helper h = new Helper(s, new List<int[][]>());
 
 		List<Skill> skills = s.getSkills();
-		nskills = skills.Length();
+		nskills = skills.size();
 		Skill[] skillIDs = new Skill[nskills];
 		for (int i = 0; i < nskills; i++) {
 			skillIDs[i] = skills.get(i);
 		}
 
 		List<Shift> shiftTypes = h.getShiftList();
-		S = shiftTypes.Length() + 1;
+		S = shiftTypes.size() + 1;
 		String[] shiftIDs = new String[S];
 		shiftIDs[0] = "None";
 		int[] skillForShift = new int[S];
 		boolean[] nightShift = new boolean[S];
-		for (int i = 0; i < S-1, i++) {
+		for (int i = 0; i < S-1; i++) {
 			Shift st = shiftTypes.get(i);
 			shiftIDs[i+1] = st.getID();
 			skillForShift[i+1] = findSkill(skillIDs, st.getSkills.get(0));
-			nightShift[i+1] = isNightShift(st.startTime, st.endTime)
+			nightShift[i+1] = isNightShift(st.startTime, st.endTime);
 		}
 
 		D = h.getDaysInPeriod();
@@ -66,13 +66,13 @@ public class Convert {
 		}
 
 		List<Employee> nurses = h.getEmployeeList();
-		int N = nurses.Length();
+		int N = nurses.size();
 		List<Contract> contracts = h.getContractList();
 		List<Pattern> patterns = h.getPatternList();
 		List<DayOffRequest> off_days = h.getDayOffRequestList();
 		List<ShiftOffRequest> off_shifts = h.getShiftOffRequestList();
 
-		npatterns = patterns.Length();
+		npatterns = patterns.size();
 		ConvertedPattern[] pats = new ConvertedPattern[npatterns];
 		for (int p = 0; p < npatterns; p++) {
 			pats[p] = new ConvertedPattern(patterns.get(p), shiftIDs);
@@ -80,14 +80,14 @@ public class Convert {
 
 		int[][] dayoff = new int[N][D];
 		int[][][] shiftoff = new int[N][D][S];
-		for (int r = 0; r < off_days.Length(); r++) {
+		for (int r = 0; r < off_days.size(); r++) {
 			req = off_days.get(r);
 			n = req.getEmployeeId();
 			d = h.getDaysFromStart(req.getDate());
 			weight = req.getWeight();
 			dayoff[n][d] = weight;
 		}
-		for (int r = 0; r < off_shifts.Length(); r++) {
+		for (int r = 0; r < off_shifts.size(); r++) {
 			req = off_shifts.get(r);
 			n = req.getEmployeeId();
 			d = h.getDaysFromStart(req.getDate());
@@ -111,7 +111,7 @@ public class Convert {
 			for (int i = 0; i < N; i++) {
 				if (evals[i].weights[c] > 0) {
 					used[c] = true;
-					nused++
+					nused++;
 					break;
 				}
 			}
@@ -129,78 +129,78 @@ public class Convert {
 		Constraints.D = D;
 		Constraints.S = S;
 
-		return new ProblemInstance(requirements, evals, nused, constraintIDs);
+		return new Problem.ProblemInstance(requirements, evals, nused, constraintIDs);
 	}
 
 	public static NurseEvaluator convertNurseInfo(Contract contract, ConvertedPattern[] patterns, int[] days_off,
 			int[][] shifts_off, boolean[] skillset, int dayoffset, int[] skillForShift, boolean[] nightShift) {
 
 		int nconstr = 15 + patterns.length;
-		ConstraintEvaluator[] constraints = new ConstraintEvaluator[nconstr];
+		Constraints.ConstrainEvaluator[] constraints = new Constraints.ConstrainEvaluator[nconstr];
 		int weights = new int[nconstr];
 
-		WeekendDef wknddef = convertWeekend(contract.getWeekendDefinition(), dayoffset);
+		Problem.WeekendDef wknddef = convertWeekend(contract.getWeekendDefinition(), dayoffset);
 
 		if (contract.getMaxNumAssignments_on() == 1) {
 			int target = contract.getMaxNumAssignments();
-			constraints[0] = new MaxAssignments(target);
+			constraints[0] = new Constraints.MaxAssignments(target);
 			weights[0] = contract.getMaxNumAssignments_weight();
 		}
 		if (contract.getMinNumAssignments_on() == 1) {
 			int target = contract.getMinNumAssignments();
-			constraints[1] = new MinAssignments(target);
+			constraints[1] = new Constraints.MinAssignments(target);
 			weights[1] = contract.getMinNumAssignments_weight();
 		}
 		if (contract.getMaxConsecutiveWorkingDays_on() == 1) {
 			int target = contract.getMaxConsecutiveWorkingDays();
-			constraints[2] = new MaxConsecutiveWorking(target);
+			constraints[2] = new Constraints.MaxConsecutiveWorking(target);
 			weights[2] = contract.getMaxConsecutiveWorkingDays_weight();
 		}
 		if (contract.getMinConsecutiveWorkingDays_on() == 1) {
 			int target = contract.getMinConsecutiveWorkingDays();
-			constraints[3] = new MinConsecutiveWorking(target);
+			constraints[3] = new Constraints.MinConsecutiveWorking(target);
 			weights[3] = contract.getMinConsecutiveWorkingDays_weight();
 		}
 		if (contract.getMaxConsecutiveFreeDays_on() == 1) {
 			int target = contract.getMaxConsecutiveFreeDays();
-			constraints[4] = new MaxConsecutiveFree(target);
+			constraints[4] = new Constraints.MaxConsecutiveFree(target);
 			weights[4] = contract.getMaxConsecutiveFreeDays_weight();
 		}
 		if (contract.getMinConsecutiveFreeDays_on() == 1) {
 			int target = contract.getMinConsecutiveFreeDays();
-			constraints[5] = new MinConsecutiveFree(target);
+			constraints[5] = new Constraints.MinConsecutiveFree(target);
 			weights[5] = contract.getMinConsecutiveFreeDays_weight();
 		}
 		if (contract.getMaxConsecutiveWorkingWeekends_on() == 1) {
 			int target = contract.getMaxConsecutiveWorkingWeekends();
-			constraints[6] = new MaxConsecutiveWorkingWeekends(target, wknddef);
+			constraints[6] = new Constraints.MaxConsecutiveWorkingWeekends(target, wknddef);
 			weights[6] = contract.getMaxConsecutiveWorkingWeekends_weight();
 		}
 		if (contract.getMinConsecutiveWorkingWeekends_on() == 1) {
 			int target = contract.getMinConsecutiveWorkingWeekends();
-			constraints[7] = new MinConsecutiveWorkingWeekends(target, wknddef);
+			constraints[7] = new Constraints.MinConsecutiveWorkingWeekends(target, wknddef);
 			weights[7] = contract.getMinConsecutiveWorkingWeekends_weight();
 		}
 		/* not implemented, because not used in any instance
 		if (contract.getMaxWorkingWeekendsInFourWeeks_on() == 1) {
 			int target = contract.getMaxWorkingWeekendsInFourWeeks();
-			constraints[8] = new MaxWorkingWeekendsInFourWeeks(target, wknddef);
+			constraints[8] = new Constraints.MaxWorkingWeekendsInFourWeeks(target, wknddef);
 			weights[8] = contract.getMaxWorkingWeekendsInFourWeeks_weight();
 		} */
 		if (contract.getCompleteWeekends()) {
-			constraints[9] = new CompleteWeekends(wknddef);
+			constraints[9] = new Constraints.CompleteWeekends(wknddef);
 			weights[9] = contract.getCompleteWeekends_weight();
 		}
 		if (contract.getIdenticalShiftTypesDuringWeekend()) {
-			constraints[10] = new SameShiftDuringWeekend(wknddef);
+			constraints[10] = new Constraints.SameShiftDuringWeekend(wknddef);
 			weights[10] = contract.getIdenticalShiftTypesDuringWeekend_weight();
 		}
 		if (contract.getNoNightShiftBeforeFreeWeekend()) {
-			constraints[11] = new NoNightShiftBeforeFreeWeekend(wknddef, nightShift);
+			constraints[11] = new Constraints.NoNightShiftBeforeFreeWeekend(wknddef, nightShift);
 			weights[11] = contract.getNoNightShiftBeforeFreeWeekend_weight();
 		}
 		if (contract.getAlternativeSkillCategory()) {
-			constraints[12] = new AlternativeSkill(skillForShift);
+			constraints[12] = new Constraints.AlternativeSkill(skillForShift);
 			weights[12] = contract.getAlternativeSkillCategory_weight();
 		}
 
@@ -230,7 +230,7 @@ public class Convert {
 
 		
 		List<Integer> unwanted = contract.getUnwantedPatterns();
-		for (int uwp = 0; uwp < unwanted.Length(); uwp++) {
+		for (int uwp = 0; uwp < unwanted.size(); uwp++) {
 			int pat = unwanted.get(uwp).intValue();
 			constraints[15+pat] = new UnwantedPattern(patterns[pat].ShiftTypes, patterns[pat].Weekdays);
 		}
@@ -257,7 +257,7 @@ public class Convert {
 
 	public static boolean[] convertSkillset(Skill[] skillIDs, List<Skill> skillset) {
 		boolean skset = new boolean[skillIDs.length];
-		for (int s = 0; s < skillset.Length()) {
+		for (int s = 0; s < skillset.size(); s++) {
 			sk = findSkill(skillset.get(s));
 			skset[sk] = true;
 		}
@@ -275,7 +275,7 @@ public class Convert {
 
 	public static int findShiftType(String[] IDs, String id) {
 		for (int i = 0; i < IDs.length; i++) {
-			if (IDs[i].equals(id) {
+			if (IDs[i].equals(id)) {
 				return i;
 			}
 		}
@@ -290,7 +290,7 @@ public class Convert {
 		public ConvertedPattern(Pattern p, String[] shiftIDs) {
 			this.weight = (double) p.getWeight();
 			List<PatternEntry> entries = p.getPatternEntryList();
-			int size = entries.Length();
+			int size = entries.size();
 			shifts = new int[size];
 			days = new int[size];
 			for (int e = 0; e < size; e++) {
@@ -330,7 +330,7 @@ public class Convert {
 		}
 	}
 
-	public WeekendDef convertWeekend(List<Day> dayList, int dayoffset) {
+	public static Problem.WeekendDef convertWeekend(List<Day> dayList, int dayoffset) {
 		int ndays = dayList.size();
 		boolean weekend = new boolean[7];
 		for (int d = 0; d < ndays; d++) {

@@ -11,13 +11,13 @@ public class NurseSolver {
 
 		XMLParser parser = new XMLParser(filename);
 		SchedulingPeriod sp = parser.parseXML();
-		ProblemInstance p = convertProblem(sp);
+		Problem.ProblemInstance p = convertProblem(sp);
 
 		int[][] finalsol = algorithm(p, 10000, 20);
 		System.out.println(p.EvaluateAll(finalsol));
 	}
 
-	public int[][] algorithm(ProblemInstance p, long timelimit, int stucklimit) {
+	public int[][] algorithm(Problem.ProblemInstance p, long timelimit, int stucklimit) {
 		long startT = System.currentTimeMillis();
 		int N = p.N;
 		int D = p.D;
@@ -44,13 +44,13 @@ public class NurseSolver {
 		}
 		List<int> days = Arrays.asList(daysArray);
 
-		repair(int[][] sol, ProblemInstance p, days);
+		repair(int[][] sol, Problem.ProblemInstance p, days);
 		
 		int nonImprovingCounter = 0;
 		while (System.currentTimeMillis() - startT < timelimit) {
 			cursol = copy(sol);
-			destroy(int[][] sol, ProblemInstance p, nurses, kN, constraints, kC);
-			repair(int[][] sol, ProblemInstance p, days);
+			destroy(int[][] sol, Problem.ProblemInstance p, nurses, kN, constraints, kC);
+			repair(int[][] sol, Problem.ProblemInstance p, days);
 			if (p.EvaluateAll(sol) > p.EvaluateAll(cursol)) {
 				nonImprovingCounter = 0;
 			} else {
@@ -64,7 +64,7 @@ public class NurseSolver {
 		return sol;
 	}
 
-	public void repair(int[][] sol, ProblemInstance p, List<int> days) {
+	public void repair(int[][] sol, Problem.ProblemInstance p, List<int> days) {
 		Collections.shuffle(days);
 		for (int day = 0; day < p.D; day++) {
 			d = days.get(day);
@@ -110,7 +110,7 @@ public class NurseSolver {
 		}
 	}
 
-	public void destroy(int[][] sol, ProblemInstance p, List<int> nurses, int kN, List<int> constraints, int kC) {
+	public void destroy(int[][] sol, Problem.ProblemInstance p, List<int> nurses, int kN, List<int> constraints, int kC) {
 		Collections.shuffle(nurses);
 		Collections.shuffle(constraints);
 		for (int i = 0; i < kN; i++) {
