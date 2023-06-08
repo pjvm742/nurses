@@ -1,56 +1,43 @@
-import java.util.Collections;
-import java.util.Arrays;
+import java.util.Random;
 import nurses.*;
 import Helper.XMLParser;
 import Attributes.SchedulingPeriod;
 
 public class NurseSolver {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		String filename = args[1];
 
 		XMLParser parser = new XMLParser(filename);
 		SchedulingPeriod sp = parser.parseXML();
-		Problem.ProblemInstance p = convertProblem(sp);
+		ProblemInstance p = Convert.convertProblem(sp);
 
 		int[][] finalsol = algorithm(p, 10000, 20);
 		System.out.println(p.EvaluateAll(finalsol));
 	}
 
-	public int[][] algorithm(Problem.ProblemInstance p, long timelimit, int stucklimit) {
+	public static int[][] algorithm(ProblemInstance p, long timelimit, int stucklimit) {
 		long startT = System.currentTimeMillis();
 		int N = p.N;
 		int D = p.D;
 		int[][] sol = new int[N][D];
 		
-		kN = N - (int) ((double) N * 2 / 3);
-		kC = p.nUsedConstraints - (int) ((double) p.nUsedConstraints * 2 / 3);
+		int kN = N - (int) ((double) N * 2 / 3);
+		int kC = p.nUsedConstraints - (int) ((double) p.nUsedConstraints * 2 / 3);
 
-		int[] nursesArray = new int[N];
-		for (int i = 0; i < N; i++) {
-			nursesArray[i] = i;
-		}
-		List<int> nurses = Arrays.asList(constraintsArray);
+		int[] nurses = new int[N];
 
-		int[] constraintsArray = new int[p.nUsedConstraints];
-		for (int i = 0; i < p.nUsedConstraints; i++) {
-			constraintsArray[i] = i;
-		}
-		List<int> constraints = Arrays.asList(constraintsArray);
+		int[] constraints = new int[p.nUsedConstraints];
 		
-		int[] daysArray = new int[D];
-		for (int i = 0; i < D; i++) {
-			daysArray[i] = i;
-		}
-		List<int> days = Arrays.asList(daysArray);
+		int[] days = new int[D];
 
-		repair(int[][] sol, Problem.ProblemInstance p, days);
+		repair(sol, p, days);
 		
 		int nonImprovingCounter = 0;
 		while (System.currentTimeMillis() - startT < timelimit) {
-			cursol = copy(sol);
-			destroy(int[][] sol, Problem.ProblemInstance p, nurses, kN, constraints, kC);
-			repair(int[][] sol, Problem.ProblemInstance p, days);
+			int[][] cursol = copy(sol);
+			destroy(sol, p, nurses, kN, constraints, kC);
+			repair(sol, p, days);
 			if (p.EvaluateAll(sol) > p.EvaluateAll(cursol)) {
 				nonImprovingCounter = 0;
 			} else {
@@ -64,12 +51,12 @@ public class NurseSolver {
 		return sol;
 	}
 
-	public void repair(int[][] sol, Problem.ProblemInstance p, List<int> days) {
-		Collections.shuffle(days);
+	public static void repair(int[][] sol, ProblemInstance p, int[] days) {
+		permute(days);
 		for (int day = 0; day < p.D; day++) {
-			d = days.get(day);
+			int d = days[day];
 			for (int s = 1; s < p.S; s++) {
-				int count;
+				int count = 0;
 				for (int i = 0; i < p.N; i++) {
 					if (sol[i][d] == s) {
 						count++;
@@ -110,22 +97,22 @@ public class NurseSolver {
 		}
 	}
 
-	public void destroy(int[][] sol, Problem.ProblemInstance p, List<int> nurses, int kN, List<int> constraints, int kC) {
-		Collections.shuffle(nurses);
-		Collections.shuffle(constraints);
+	public static void destroy(int[][] sol, ProblemInstance p, int[] nurses, int kN, int[] constraints, int kC) {
+		permute(nurses);
+		permute(constraints);
 		for (int i = 0; i < kN; i++) {
 			for (int c = 0; c < kC; c++) {
-				int nurse = nurses.get(i);
-				int constraint = constraints.get(c);
+				int nurse = nurses[i];
+				int constraint = constraints[c];
 				p.Enforce(sol, nurse, constraint);
 			}
 		}
 	}
 
 
-	public int[][] copy(int[][] sol) {
-		N = sol.length;
-		D = sol[0].length;
+	public static int[][] copy(int[][] sol) {
+		int N = sol.length;
+		int D = sol[0].length;
 
 		int[][] solcopy = new int[N][D];
 		for (int i = 0; i < N; i++) {
@@ -134,5 +121,16 @@ public class NurseSolver {
 			}
 		}
 		return solcopy;
+	}
+
+	public static void permute(int[] a) {
+		int n = a.length;
+		Random r = new Random();
+		for (int k = n; k > 0; k--) {
+			int j = r.nextInt(k);
+			int temp = a[j];
+			a[j] = a[k];
+			a[k] = temp;
+		}
 	}
 }

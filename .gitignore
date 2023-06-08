@@ -7,3 +7,4 @@ code/Attributes/*
 /bin/
 .classpath
 .project
+*.class
