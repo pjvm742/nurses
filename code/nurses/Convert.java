@@ -32,7 +32,8 @@ public class Convert {
 	}
 
 	public static Problem.ProblemInstance convertProblem(SchedulingPeriod s) {
-		Helper h = new Helper(s, new List<int[][]>());
+		List<int[][]> dummy = new ArrayList<>();
+		Helper h = new Helper(s, dummy);
 
 		List<Skill> skills = s.getSkills();
 		nskills = skills.size();

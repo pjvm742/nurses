@@ -3,10 +3,10 @@ package nurses;
 public class Problem {
 
 	class NurseEvaluator { // super-evaluator for the constraints of one nurse
-		ConstraintEvaluator[] constraints;
+		Constraints.ConstraintEvaluator[] constraints;
 		int[] weights;
 
-		public NurseEvaluator(ConstraintEvaluator[] constraints, int[] weights) {
+		public NurseEvaluator(Constraints.ConstraintEvaluator[] constraints, int[] weights) {
 			this.constraints = constraints;
 			this.weights = weights;
 		}
@@ -118,6 +118,17 @@ public class Problem {
 				}
 				if (isWeekendStart(d)) {
 					return d;
+				}
+			}
+		}
+
+		public int isStartOfWorkingWeekend(int[] roster, int d) {
+			if(isWeekendStart(d)) {
+				for(int i = 0; i < 4 && d+i < D; i++) { // max weekend length is equal to 4 days
+					boolean workingWeekend = false;
+					if(isWeekend(d+i) && roster[d+i] != 0) {
+						workingWeekend = true;
+					}
 				}
 			}
 		}

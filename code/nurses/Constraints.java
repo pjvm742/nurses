@@ -3,10 +3,6 @@ package nurses;
 import java.util.Random;
 
 public class Constraints {
-	public static int D;
-	public static int S;
-	public static int N;
-	
 	public abstract class ConstraintEvaluator {
 		public abstract int Evaluate(int[] roster); // determines the number of violations of this constraint in the roster
 		public abstract int Contribution(int[] roster, int position); // determines the number of violations of this constraint that one day is involved in
@@ -25,18 +21,6 @@ public class Constraints {
 		public int ChooseShiftType() {
 			Random r = new Random();
 			return r.nextInt(S);
-		}
-
-		public static int isStartOfWorkingWeekend(int[] roster, int d, Problem.WeekendDef w) {
-			if(w.isWeekendStart(d)) {
-				for(int i = 0; i < 4 && d+i < D; i++) { // max weekend length is equal to 4 days
-					boolean workingWeekend = false;
-					if(w.isWeekend(d+i) && roster[d+i] != 0) {
-						workingWeekend = true;
-					}
-				}
-			}
-
 		}
 	}
 	
