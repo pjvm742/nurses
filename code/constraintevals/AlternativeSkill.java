@@ -1,4 +1,6 @@
-package nurses;
+package constraintevals;
+
+import nurses.*;
 
 public class AlternativeSkill extends ConstraintEvaluator {
 	int[] requiredSkill;

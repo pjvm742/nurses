@@ -1,6 +1,7 @@
-package nurses;
+package constraintevals;
 
 import java.util.Arrays;
+import nurses.*;
 
 public class MaxTotalAssign extends ConstraintEvaluator {
 		int max;

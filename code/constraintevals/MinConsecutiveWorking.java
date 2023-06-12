@@ -1,32 +1,33 @@
-package nurses;
+package constraintevals;
+import nurses.*;
 
 
-	public class MaxConsecutiveWorking extends ConstraintEvaluator {
-		int max;
-
-		public MaxConsecutiveWorking(int k) {
-			this.max = k;
+	public class MinConsecutiveWorking extends ConstraintEvaluator {
+		int min;
+	
+		public MinConsecutiveWorking(int k) {
+			this.min = k;
 		}
-		
+
 		public int Evaluate(int[] roster) {
-			int nseq = 0;
 			int violation = 0;
+			int nseq = 0;
 			for (int d = 0; d < Dim.D; d++) {
 				if (roster[d] > 0) {
 					nseq++;
-				} else {
-					if (nseq > max) {
-						violation += nseq - max;
-					}
-					nseq = 0;
+				} else if(nseq < min) {
+					violation += min - nseq;
+				        nseq = 0;
 				}
 			}
-			if (nseq > max) {
-				violation += nseq - max;
+			if(nseq < min) {
+				violation += min - nseq;
+			        nseq = 0;
 			}
+
 			return violation;
 		}
-
+	
 		public int Contribution(int[] roster, int pos) {
 			if (roster[pos] > 0) {
 				int start = pos;
@@ -42,7 +43,7 @@ package nurses;
 					}
 				}
 				int length = end - start + 1;
-				if (length > max) {
+				if (length < min) {
 					return 1;
 				}
 			} else {
@@ -56,10 +57,9 @@ package nurses;
 			for (int d = 0; d < Dim.D; d++) {
 				if (roster[d] > 0) {
 					nseq++;
-					if (nseq > max) {
-						roster[d] = 0;
-						nseq = 0;
-					}
+				} else if(nseq < min){
+					roster[d] = ChooseShiftType();
+					nseq++;
 				} else {
 					nseq = 0;
 				}

@@ -1,4 +1,5 @@
-package nurses;
+package constraintevals;
+import nurses.*;
 
 
 	public class MinConsecutiveWorkingWeekends extends ConstraintEvaluator {
