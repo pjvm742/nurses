@@ -49,8 +49,8 @@ public class NurseSolver {
 		while (System.currentTimeMillis() - startT < timelimit) {
 			int[][] cursol = copy(sol);
 			destroy(sol, p, nurses, kN, constraints, kC);
-			repair(sol, p, days);
-			if (p.EvaluateAll(sol) > p.EvaluateAll(cursol)) {
+			repair(sol, p, days, nurses);
+			if (p.EvaluateAll(sol) < p.EvaluateAll(cursol)) {
 				nonImprovingCounter = 0;
 			} else {
 				sol = cursol;
