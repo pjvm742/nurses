@@ -34,6 +34,31 @@ public class Convert {
 		return sol;
 	}
 
+	public static List<int[][]> convertSolutionBack(int [][] orig) {
+		int N = orig.length;
+		int D = orig[0].length;
+		int S = 0;
+		for(int i = 0; i < orig.length; i++) {
+			int current = orig[i][0];
+			if(current > S) {
+				S = current;
+			}
+		}
+
+		List<int[][]> sol = new ArrayList<int[][]>();
+		for(int d = 0; d < D; d++) {
+			int[][] day = new int[S][N];
+			for(int j = 0; j < orig.length; j++) {
+				if(orig[j][d] != 0) {
+					day[orig[j][d] - 1][j] = 1;
+					}
+				}
+			sol.add(day);
+		}
+		return sol;
+	}
+
+
 	public static ProblemInstance convertProblem(SchedulingPeriod s) {
 		List<int[][]> dummy = new ArrayList<int[][]>();
 		Helper h = new Helper(s, dummy);
