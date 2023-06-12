@@ -1,4 +1,4 @@
-import java.util.Arrays;
+import java.lang.Double;
 import java.util.Random;
 import nurses.*;
 import Helper.XMLParser;
@@ -7,19 +7,25 @@ import Attributes.SchedulingPeriod;
 public class NurseSolver {
 
 	public static void main(String[] args) throws Exception {
-		String filename = "long01";
+		if (args.length != 2) {
+			System.err.println("Wrong number of arguments. Need 2: instance name and time allowance.");
+			System.exit(1);
+		}
+		String filename = args[0];
+		double time = Double.parseDouble(args[1]);
+		long millisecondsTime = (long) time*1000;
 
 		XMLParser parser = new XMLParser(filename);
 		SchedulingPeriod sp = parser.parseXML();
 		ProblemInstance p = Convert.convertProblem(sp);
-		int[][] finalsol = algorithm(p, 10000, 2000);
+		int[][] finalsol = algorithm(p, millisecondsTime);
 		for(int i = 0; i < finalsol.length; i++) {
 			//System.out.println(Arrays.toString(finalsol[i]));
 		}
 		System.out.println(p.EvaluateAll(finalsol));
 	}
 
-	public static int[][] algorithm(ProblemInstance p, long timelimit, int stucklimit) {
+	public static int[][] algorithm(ProblemInstance p, long timelimit) {
 		long startT = System.currentTimeMillis();
 		int N = p.N;
 		int D = p.D;
@@ -29,7 +35,10 @@ public class NurseSolver {
 		for(int i=0; i < N; i++){
 			nurses[i] = i;
 		}
-
+		
+		int kN = N - (int) ((double) N * 3/4);
+		int kC = p.nUsedConstraints - (int) ((double) p.nUsedConstraints * 3/4);
+		
 		int[] constraints = new int[p.nUsedConstraints];
 		for(int i=0; i < p.nUsedConstraints ; i++){
 			constraints[i] = i;
@@ -42,23 +51,16 @@ public class NurseSolver {
 		
 		repair(sol, p, days, nurses);
 		
-		Random r = new Random();
+		//Random r = new Random();
 		
-		int nonImprovingCounter = 0;
 		while (System.currentTimeMillis() - startT < timelimit) {
 			int[][] cursol = copy(sol);
-			int kN = r.nextInt(N) + 1;
-			int kC = r.nextInt(p.nUsedConstraints) + 1;
+			//int kN = r.nextInt(N) + 1;
+			//int kC = r.nextInt(p.nUsedConstraints) + 1;
 			destroy(sol, p, nurses, kN, constraints, kC);
 			repair(sol, p, days, nurses);
-			if (p.EvaluateAll(sol) <= p.EvaluateAll(cursol)) {
-				nonImprovingCounter = 0;
-			} else {
+			if (p.EvaluateAll(sol) > p.EvaluateAll(cursol)) {
 				sol = cursol;
-				nonImprovingCounter++;
-			}
-			if (nonImprovingCounter >= stucklimit) {
-				break;
 			}
 		}
 		return sol;
