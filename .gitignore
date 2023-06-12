@@ -8,3 +8,5 @@ code/Attributes/*
 .classpath
 .project
 *.class
+*/instances/*
+*/files/*
