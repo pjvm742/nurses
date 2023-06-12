@@ -7,12 +7,12 @@ import Attributes.SchedulingPeriod;
 public class NurseSolver {
 
 	public static void main(String[] args) throws Exception {
-		String filename = "sprint_late03";
+		String filename = "long01";
 
 		XMLParser parser = new XMLParser(filename);
 		SchedulingPeriod sp = parser.parseXML();
 		ProblemInstance p = Convert.convertProblem(sp);
-		int[][] finalsol = algorithm(p, 10000, 200);
+		int[][] finalsol = algorithm(p, 10000, 2000);
 		for(int i = 0; i < finalsol.length; i++) {
 			//System.out.println(Arrays.toString(finalsol[i]));
 		}
@@ -24,9 +24,6 @@ public class NurseSolver {
 		int N = p.N;
 		int D = p.D;
 		int[][] sol = new int[N][D];
-		
-		int kN = N - (int) ((double) N * 2 / 3);
-		int kC = p.nUsedConstraints - (int) ((double) p.nUsedConstraints * 2 / 3);
 
 		int[] nurses = new int[N];
 		for(int i=0; i < N; i++){
@@ -45,9 +42,13 @@ public class NurseSolver {
 		
 		repair(sol, p, days, nurses);
 		
+		Random r = new Random();
+		
 		int nonImprovingCounter = 0;
 		while (System.currentTimeMillis() - startT < timelimit) {
 			int[][] cursol = copy(sol);
+			int kN = r.nextInt(N) + 1;
+			int kC = r.nextInt(p.nUsedConstraints) + 1;
 			destroy(sol, p, nurses, kN, constraints, kC);
 			repair(sol, p, days, nurses);
 			if (p.EvaluateAll(sol) <= p.EvaluateAll(cursol)) {
@@ -65,8 +66,8 @@ public class NurseSolver {
 
 	public static void repair(int[][] sol, ProblemInstance p, int[] days, int [] nurses) {
 		permute(days);
-		permute(nurses);
 		for (int day = 0; day < p.D; day++) {
+			permute(nurses);
 			int d = days[day];
 			for (int s = 1; s < p.S; s++) {
 				int count = 0;

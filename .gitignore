@@ -9,5 +9,6 @@ code/Attributes/*
 .project
 *.class
 instances/*
+files/*
 code/files/*
 *.jar
