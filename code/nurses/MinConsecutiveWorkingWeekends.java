@@ -67,7 +67,7 @@ package nurses;
 		}
 
 		public void Enforce(int[] roster) {
-			int nseq;
+			int nseq = 0;
 			for (int d = 0; d < Dim.D; d++) {
 				if (w.isWeekendStart(d)) {
 					if (w.isStartOfWorkingWeekend(roster, d)) {

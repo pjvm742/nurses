@@ -86,14 +86,14 @@ public class Convert {
 		for (int r = 0; r < off_days.size(); r++) {
 			DayOff req = off_days.get(r);
 			int n = req.getEmployeeId();
-			int d = h.getDaysFromStart(req.getDate());
+			int d = h.getDaysFromStart(req.getDate()) -1;
 			int weight = req.getWeight();
 			dayoff[n][d] = weight;
 		}
 		for (int r = 0; r < off_shifts.size(); r++) {
 			ShiftOff req = off_shifts.get(r);
 			int n = req.getEmployeeId();
-			int d = h.getDaysFromStart(req.getDate());
+			int d = h.getDaysFromStart(req.getDate()) -1;
 			int sh = findShiftType(shiftIDs, req.getShiftTypeId());
 			int weight = req.getWeight();
 			shiftoff[n][d][sh] = weight;

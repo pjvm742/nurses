@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.Random;
 import nurses.*;
 import Helper.XMLParser;
@@ -6,13 +7,15 @@ import Attributes.SchedulingPeriod;
 public class NurseSolver {
 
 	public static void main(String[] args) throws Exception {
-		String filename = args[1];
+		String filename = "sprint01";
 
 		XMLParser parser = new XMLParser(filename);
 		SchedulingPeriod sp = parser.parseXML();
 		ProblemInstance p = Convert.convertProblem(sp);
-
-		int[][] finalsol = algorithm(p, 10000, 20);
+		int[][] finalsol = algorithm(p, 10000, 200);
+		for(int i = 0; i < finalsol.length; i++) {
+			//System.out.println(Arrays.toString(finalsol[i]));
+		}
 		System.out.println(p.EvaluateAll(finalsol));
 	}
 
@@ -26,12 +29,21 @@ public class NurseSolver {
 		int kC = p.nUsedConstraints - (int) ((double) p.nUsedConstraints * 2 / 3);
 
 		int[] nurses = new int[N];
+		for(int i=0; i < N; i++){
+			nurses[i] = i;
+		}
 
 		int[] constraints = new int[p.nUsedConstraints];
+		for(int i=0; i < p.nUsedConstraints ; i++){
+			constraints[i] = i;
+		}
 		
 		int[] days = new int[D];
-
-		repair(sol, p, days);
+		for(int i=0; i < D; i++){
+			days[i] = i;
+		}
+		
+		repair(sol, p, days, nurses);
 		
 		int nonImprovingCounter = 0;
 		while (System.currentTimeMillis() - startT < timelimit) {
@@ -51,8 +63,9 @@ public class NurseSolver {
 		return sol;
 	}
 
-	public static void repair(int[][] sol, ProblemInstance p, int[] days) {
+	public static void repair(int[][] sol, ProblemInstance p, int[] days, int [] nurses) {
 		permute(days);
+		permute(nurses);
 		for (int day = 0; day < p.D; day++) {
 			int d = days[day];
 			for (int s = 1; s < p.S; s++) {
@@ -67,7 +80,8 @@ public class NurseSolver {
 					boolean first = true;
 					int min = 0;
 					int minval = 0;
-					for (int i = 0; i < p.N; i++) {
+					for (int n = 0; n < p.N; n++) {
+						int i = nurses[n];
 						if (sol[i][d] == s) {
 							int impact = p.ImpactOfChange(sol, i, d, 0);
 							if (first || impact <= minval) {
@@ -77,14 +91,22 @@ public class NurseSolver {
 						}
 					}
 					sol[min][d] = 0;
+					count = 0;
+					for (int i = 0; i < p.N; i++) {
+						if (sol[i][d] == s) {
+							count++;
+						}
+					}
 				}
 				while (count < demand) {
 					boolean first = true;
 					int min = 0;
 					int minval = 0;
-					for (int i = 0; i < p.N; i++) {
+					for (int n = 0; n < p.N; n++) {
+						int i = nurses[n];
 						if (sol[i][d] == 0) {
 							int impact = p.ImpactOfChange(sol, i, d, s);
+							//System.out.println(impact);
 							if (first || impact <= minval) {
 								min = i;
 								minval = impact;
@@ -92,6 +114,12 @@ public class NurseSolver {
 						}
 					}
 					sol[min][d] = s;
+					count = 0;
+					for (int i = 0; i < p.N; i++) {
+						if (sol[i][d] == s) {
+							count++;
+						}
+					}
 				}
 			}
 		}
@@ -100,6 +128,9 @@ public class NurseSolver {
 	public static void destroy(int[][] sol, ProblemInstance p, int[] nurses, int kN, int[] constraints, int kC) {
 		permute(nurses);
 		permute(constraints);
+		for(int i = 0; i < sol.length; i++) {
+			//System.out.println(Arrays.toString(sol[i]));
+		}
 		for (int i = 0; i < kN; i++) {
 			for (int c = 0; c < kC; c++) {
 				int nurse = nurses[i];
@@ -107,6 +138,10 @@ public class NurseSolver {
 				p.Enforce(sol, nurse, constraint);
 			}
 		}
+		for(int i = 0; i < sol.length; i++) {
+			//System.out.println(Arrays.toString(sol[i]));
+		}
+		//System.out.println();
 	}
 
 
@@ -129,8 +164,8 @@ public class NurseSolver {
 		for (int k = n; k > 0; k--) {
 			int j = r.nextInt(k);
 			int temp = a[j];
-			a[j] = a[k];
-			a[k] = temp;
+			a[j] = a[k-1];
+			a[k-1] = temp;
 		}
 	}
 }

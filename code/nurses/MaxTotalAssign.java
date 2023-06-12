@@ -1,6 +1,8 @@
 package nurses;
 
-	public class MaxTotalAssign extends ConstraintEvaluator {
+import java.util.Arrays;
+
+public class MaxTotalAssign extends ConstraintEvaluator {
 		int max;
 
 		public MaxTotalAssign(int k) {
@@ -31,6 +33,7 @@ package nurses;
 		}
 
 		public void Enforce(int[] roster) {
+			//System.out.println(Arrays.toString(roster));
 			int violationValue = Evaluate(roster);
 			int totalWorkingDays = 0;
 			for (int d = 0; d < Dim.D; d++) {
@@ -50,5 +53,8 @@ package nurses;
 					}
 				}
 			}
+			//System.out.println(Arrays.toString(roster));
+			//System.out.println();
 		}
+		
 	}

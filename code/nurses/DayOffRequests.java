@@ -9,7 +9,7 @@ package nurses;
 		}
 
 		public int Evaluate(int[] roster) {
-			int violations;
+			int violations = 0;
 			for (int d = 0; d < Dim.D; d++) {
 				violations += Contribution(roster, d);
 			}
