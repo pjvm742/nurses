@@ -7,7 +7,7 @@ import Attributes.SchedulingPeriod;
 public class NurseSolver {
 
 	public static void main(String[] args) throws Exception {
-		String filename = "sprint01";
+		String filename = "sprint_late03";
 
 		XMLParser parser = new XMLParser(filename);
 		SchedulingPeriod sp = parser.parseXML();
@@ -50,7 +50,7 @@ public class NurseSolver {
 			int[][] cursol = copy(sol);
 			destroy(sol, p, nurses, kN, constraints, kC);
 			repair(sol, p, days, nurses);
-			if (p.EvaluateAll(sol) < p.EvaluateAll(cursol)) {
+			if (p.EvaluateAll(sol) <= p.EvaluateAll(cursol)) {
 				nonImprovingCounter = 0;
 			} else {
 				sol = cursol;
@@ -78,7 +78,7 @@ public class NurseSolver {
 				int demand = p.demands[d][s];
 				while (count > demand) {
 					boolean first = true;
-					int min = 0;
+					int min = -1;
 					int minval = 0;
 					for (int n = 0; n < p.N; n++) {
 						int i = nurses[n];
@@ -91,16 +91,20 @@ public class NurseSolver {
 						}
 					}
 					sol[min][d] = 0;
-					count = 0;
-					for (int i = 0; i < p.N; i++) {
-						if (sol[i][d] == s) {
-							count++;
-						}
+					count--;
+				}
+			}
+			for (int s = 1; s < p.S; s++) {
+				int count = 0;
+				for (int i = 0; i < p.N; i++) {
+					if (sol[i][d] == s) {
+						count++;
 					}
 				}
+				int demand = p.demands[d][s];
 				while (count < demand) {
 					boolean first = true;
-					int min = 0;
+					int min = -1;
 					int minval = 0;
 					for (int n = 0; n < p.N; n++) {
 						int i = nurses[n];
@@ -114,12 +118,7 @@ public class NurseSolver {
 						}
 					}
 					sol[min][d] = s;
-					count = 0;
-					for (int i = 0; i < p.N; i++) {
-						if (sol[i][d] == s) {
-							count++;
-						}
-					}
+					count++;
 				}
 			}
 		}
