@@ -39,9 +39,11 @@ public class Convert {
 		int D = orig[0].length;
 		int S = 0;
 		for(int i = 0; i < orig.length; i++) {
-			int current = orig[i][0];
-			if(current > S) {
+			for(int j = 0; j > orig[0].length; j++) {
+				int current = orig[i][j];
+				if(current > S) {
 				S = current;
+				}
 			}
 		}
 
