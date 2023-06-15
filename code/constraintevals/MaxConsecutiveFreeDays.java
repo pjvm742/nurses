@@ -38,7 +38,10 @@ public class MaxConsecutiveFreeDays extends ConstraintEvaluator {
 			int compval = Evaluate(roster);
 			roster[pos] = cur;
 
-			return curval - compval;
+			if (curval > compval) {
+				return curval - compval;
+			}
+			return 0;
 	}
 
 	public void Enforce(int[] roster) {
