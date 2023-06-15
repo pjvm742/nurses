@@ -38,7 +38,7 @@ import nurses.*;
 			}
 			int nConseq = 0;
 			int start = w.findStart(pos);
-			if (w.isStartOfWorkingWeekend(roster, start)) {
+			if (roster[pos] > 0) {
 				nConseq = 1;
 			} else {
 				return 0;
@@ -62,7 +62,7 @@ import nurses.*;
 				nConseq++;
 			}
 			if (nConseq > max) {
-				return nConseq - max;
+				return 1;
 			}
 			return 0;
 		}
