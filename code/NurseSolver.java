@@ -36,8 +36,8 @@ public class NurseSolver {
 			nurses[i] = i;
 		}
 		
-		int kN = N - (int) ((double) N * 3/4);
-		int kC = p.nUsedConstraints - (int) ((double) p.nUsedConstraints * 3/4);
+		//int kN = N - (int) ((double) N * 3/4);
+		//int kC = p.nUsedConstraints - (int) ((double) p.nUsedConstraints * 3/4);
 		
 		int[] constraints = new int[p.nUsedConstraints];
 		for(int i=0; i < p.nUsedConstraints ; i++){
@@ -52,15 +52,23 @@ public class NurseSolver {
 		repair(sol, p, days, nurses);
 		
 		//Random r = new Random();
+
+		DynamicParams g = new DynamicParams(N, p.nUsedConstraints);
 		
 		while (System.currentTimeMillis() - startT < timelimit) {
 			int[][] cursol = copy(sol);
 			//int kN = r.nextInt(N) + 1;
 			//int kC = r.nextInt(p.nUsedConstraints) + 1;
+			g.sample();
+			int kN = g.kN;
+			int kC = g.kC;
 			destroy(sol, p, nurses, kN, constraints, kC);
 			repair(sol, p, days, nurses);
 			if (p.EvaluateAll(sol) > p.EvaluateAll(cursol)) {
-				sol = cursol;
+				sol = cursol; // failure
+				g.update(false);
+			} else {
+				g.update(true); // success
 			}
 		}
 		return sol;
