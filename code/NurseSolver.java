@@ -66,23 +66,23 @@ public class NurseSolver {
 		
 		//Random r = new Random();
 
-		DynamicParams g = new DynamicParams(N, p.nUsedConstraints);
+		//DynamicParams g = new DynamicParams(N, p.nUsedConstraints);
 		
 		int iters = 0;
 		while (System.currentTimeMillis() - startT < timelimit) {
 			int[][] cursol = copy(sol);
 			//int kN = r.nextInt(N) + 1;
 			//int kC = r.nextInt(p.nUsedConstraints) + 1;
-			g.sample();
-			int kN = g.kN;
-			int kC = g.kC;
+			//g.sample();
+			//int kN = g.kN;
+			//int kC = g.kC;
 			destroy(sol, p, nurses, kN, constraints, kC);
 			repair(sol, p, days, nurses);
 			if (p.EvaluateAll(sol) > p.EvaluateAll(cursol)) {
 				sol = cursol; // failure
-				g.update(false);
+				//g.update(false);
 			} else {
-				g.update(true); // success
+				//g.update(true); // success
 			}
 			iters++;
 		}
