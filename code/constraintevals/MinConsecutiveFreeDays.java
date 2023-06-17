@@ -19,7 +19,6 @@ import nurses.*;
 					violation += min - nseq;
 					nseq = 0;
 				}
-				System.out.println(violation);
 			}
 			if (nseq < min) {
 				violation += min - nseq;
