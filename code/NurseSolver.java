@@ -89,7 +89,7 @@ public class NurseSolver {
 				int demand = p.demands[d][s];
 				while (count > demand) {
 					boolean first = true;
-					int min = -1;
+		/*			int min = -1;
 					int minval = 0;
 					for (int n = 0; n < p.N; n++) {
 						int i = nurses[n];
@@ -101,7 +101,15 @@ public class NurseSolver {
 							}
 						}
 					}
-					sol[min][d] = 0;
+					sol[min][d] = 0; */
+					for (int n = 0; n < p.N; n++) {
+						int i = nurses[n];
+						if (sol[i][d] == s) {
+							sol[i][d] = 0;
+							break;
+						}
+					}
+
 					count--;
 				}
 			}
@@ -115,7 +123,7 @@ public class NurseSolver {
 				int demand = p.demands[d][s];
 				while (count < demand) {
 					boolean first = true;
-					int min = -1;
+		/*			int min = -1;
 					int minval = 0;
 					for (int n = 0; n < p.N; n++) {
 						int i = nurses[n];
@@ -128,7 +136,14 @@ public class NurseSolver {
 							}
 						}
 					}
-					sol[min][d] = s;
+					sol[min][d] = s; */
+					for (int n = 0; n < p.N; n++) {
+						int i = nurses[n];
+						if (sol[i][d] == 0) {
+							sol[i][d] = s;
+							break;
+						}
+					}
 					count++;
 				}
 			}

@@ -2,6 +2,9 @@
 
 \usepackage[boxed,vlined]{algorithm2e}
 
+\usepackage[maxbibnames=30,backend=biber]{biblatex}
+\addbibresource{refs.bib}
+
 
 \title{An algorithm for the nurse rostering problem}
 
@@ -10,23 +13,52 @@
 
 \section{Introduction}
 
-In the rapidly developing world we live in today our progressing health is among the things has given rise to some challenges. For example, one notable challenge that countries currently grapple with is the substantial pressure exerted on pension funds. This is a direct result of the fact that our life expectancy is increasing because of the prosperity of the society. Another sector facing considerable difficulties is the health care industry and in particular personnel management. As patients often require care around the clock effective deployment of the personnel is important to be able maintain high-quality patient care.
+In the rapidly developing world we live in today our progressing health is among the things has given rise to some challenges.
+For example, one notable challenge that countries currently grapple with is the substantial pressure exerted on pension funds.
+This is a direct result of the fact that our life expectancy is increasing because of the prosperity of the society.
+Another sector facing considerable difficulties is the health care industry and in particular personnel management.
+As patients often require care around the clock effective deployment of the personnel is important to be able maintain high-quality patient care.
 
-A key part to the optimization of the deployment of the personnel is the rostering of nurses. This has proven to be a strenuous problem to tackle in practice. Next to the fact that rosters often have as a necessity to be covered around the clock, there are no days throughout the year that demand comes to a halt. Furthermore, there are a multitude of constraints and preferences involved. It is desirable to take as many of these in regard when creating a roster as they are crucial to maintaining staff satisfaction, minimizing cost and staying in line with government regulations.
+A key part to the optimization of the deployment of the personnel is the rostering of nurses.
+This has proven to be a strenuous problem to tackle in practice.
+Next to the fact that rosters often have as a necessity to be covered around the clock, there are no days throughout the year that demand comes to a halt.
+Furthermore, there are a multitude of constraints and preferences involved.
+It is desirable to take as many of these in regard when creating a roster as they are crucial to maintaining staff satisfaction, minimizing cost and staying in line with government regulations.
 
-Over the years, various approaches have been proposed to address the nurse rostering problem however it has not received as much attention as it deserves. This has caused researchers to write out competitions to garner more interest for the optimization problem of nurse scheduling. One such competition is the International Nurse Rostering Competition of 2010 (INRC2010). The most important goal of this competition was to foster new approaches to the problem at hand by attracting participants from diverging research fields. Next to this the competition aimed t close the gap between research practice for this important topic.
+Over the years, various approaches have been proposed to address the nurse rostering problem however it has not received as much attention as it deserves.
+This has caused researchers to write out competitions to garner more interest for the optimization problem of nurse scheduling.
+One such competition is the International Nurse Rostering Competition of 2010 (INRC2010, see \cite{inrc}).
+The most important goal of this competition was to foster new approaches to the problem at hand by attracting participants from diverging research fields.
+Next to this the competition aimed t close the gap between research practice for this important topic.
 
-The competition has resulted in some interesting results and approaches to the specific problem instances of the competition. Valouxis et al used a two phase approach where the focus of the first phase was on the assignment of working days and the second stage focused on the assignment of specific daily shifts. This was then combined with several swap operators that searched across combinations of nurses' partial schedules.
-Such local search operators are common when looking at different approaches to the competition. Abuhamdah et al used a population based local search that also uses different operators.
+The competition has resulted in some interesting results and approaches to the specific problem instances of the competition.
+Valouxis et al used a two phase approach where the focus of the first phase was on the assignment of working days and the second stage focused on the assignment of specific daily shifts.
+This was then combined with several swap operators that searched across combinations of nurses' partial schedules.
+Such local search operators are common when looking at different approaches to the competition.
+Abuhamdah et al used a population based local search that also uses different operators.
 
-This paper proposes an innovative approach to the nurse rostering problem that can be described as a large neighborhood search that is guided by soft constraints. It creates an initial feasible schedule according to the hard constraints and searches the solution space for improvements using the soft constraints.To assess the effectiveness of the proposed approach, we conduct experiments using the instances provided by the INRC2010 and compare them to the optimal solutions that have been found so far. 
+This paper proposes an innovative approach to the nurse rostering problem that can be described as a large neighborhood search that is guided by soft constraints.
+It creates an initial feasible schedule according to the hard constraints and searches the solution space for improvements using the soft constraints.
+To assess the effectiveness of the proposed approach, we conduct experiments using the instances provided by the INRC2010 and compare them to the optimal solutions that have been found so far. 
 
-The structure of this paper is as follows: in the beginning we will explain upon the problem specification. We will take a look at the different constraint and instances of the competition. The next part presents the proposed algorithm and its implementation for use on the problem instances. After this we describe the experimental setup and discusses the obtained results. Finally, the paper concludes with a conclusion and some remarks on possible improvements and future research.
+The structure of this paper is as follows: in the beginning we will explain upon the problem specification.
+We will take a look at the different constraint and instances of the competition.
+The next part presents the proposed algorithm and its implementation for use on the problem instances.
+After this we describe the experimental setup and discusses the obtained results.
+Finally, the paper concludes with a conclusion and some remarks on possible improvements and future research.
 
 \section{Problem description}
-The problem set out by the competition consists of some specific parts. A planning period is specified along with shift types, the day and shift requirements, and the different types of contracts that nurses can have. In these contracts the working regulations of the nurses are stated.
-The problem consists of a number of constraints that have been divided into hard and soft constraints. The hard constraints are the constraints that have to be respected for a schedule to be considered feasible. The soft constraints can be seen as preferences of the nurses.
-For the hard constraints we have that shift requirements must be met, that means every demanded shift must be assigned to a nurse, and the constraint that every nurse can work only one shift per day. Not violating these constraints leads to a feasible schedule.
+The problem set out by the competition consists of some specific parts.
+A planning period is specified along with shift types, the day and shift requirements, and the different types of contracts that nurses can have.
+In these contracts the working regulations of the nurses are stated.
+
+The problem consists of a number of constraints that have been divided into hard and soft constraints.
+The hard constraints are the constraints that have to be respected for a schedule to be considered feasible.
+The soft constraints can be seen as preferences of the nurses.
+
+For the hard constraints we have that shift requirements must be met, that means every demanded shift must be assigned to a nurse, and the constraint that every nurse can work only one shift per day.
+Not violating these constraints leads to a feasible schedule.
+
 There are many more soft constraints that range from working a maximum or minimum number of days in a row to specific requests for days of shifts.
 The soft constraints considered in the problem are the following:
 \begin{itemize}
@@ -42,20 +74,21 @@ The soft constraints considered in the problem are the following:
 	\item no night shifts assigned to a nurse before a free weekend
 	\item certain patterns not appearing in the schedule
 \end{itemize}
-Now to be able to distinguish different schedules in terms of solution quality the soft constraint violations are taken into account. 
-In every instance of the problem and in every different contract, the constraints are assigned a certain weight. Then to validate the solution quality the evaluation of the schedule is done by multiplying the weight times the number of violations for every constraint and for every nurse. The sum of this is equal to the final solution value.
 
-The problem instances can be divided into three different types: the sprint, medium and long instances. The competition classified them as such because they are permitted different amounts of running time. The sprint instances are allowed 10 seconds of running time, the medium instances three minutes and the long instances 10 hours. The instances are provided as XML files.
+Now to be able to distinguish different schedules in terms of solution quality the soft constraint violations are taken into account.
+In every instance of the problem and in every different contract, the constraints are assigned a certain weight.
+Then to validate the solution quality the evaluation of the schedule is done by multiplying the weight times the number of violations for every constraint and for every nurse.
+The sum of this is equal to the final solution value.
 
-\section{Algorithm}
-The algorithm that was implemented for this paper can be described as a large neighborhood search guided by soft constraints. The thought process behind the algorithm was to create something original that had not been seen in the literature yet. The idea was to create relatively simple solution approach that could be readily understood. 
-To extract the information from the instances we make use of the XML parser of Duysak et al.
-The algorithm itself starts with an initial feasible solution that respects the hard constraints. The solution schedule is represented as a two dimensional N x D matrix. The rowns correspond to the nurses and the columns to the days in the planning period. The entries in the matrix resemble the shift that is assigned to a nurse on a specific day. A zero entry means a nurse has a day off and the shift types in an instance are numbered to represent the other entries where a shift is assigned to a nurse.
-After initializing a feasible solution, a certain number kN of nurses and kC of constraints are randomly chosen. For these nurses the constraints are consecutively enforced. Enforcing here is meant in the sense of removing all violations of this constraint for the specific nurse by either or assigning shifts to nurses. After this process the remaining schedule is not feasible anymore. To get back to a feasible solution we have to repair the schedule. We start by looking through all the days in a random order. If the shift requirements are currently not met on a day (either to many shifts are assigned or not enough shifts are assigned), we fix it by either assigning shifts of removing shifts. This assigning or removing shifts to nurses is done by looking at the impact the change would have on the total penalty value of a nurse. Assigning or removing shifts is done to the nurse whose penalty value it affects the least.
-After these operations, when the schedule has been made feasible again, the solution value is calculated. If the new schedule leads to a better solution value, the current schedule is adjusted to this better version and we start the process again.
+The problem instances can be divided into three different types: the sprint, medium and long instances.
+The competition classified them as such because they are permitted different amounts of running time.
+The sprint instances are allowed 10 seconds of running time, the medium instances three minutes and the long instances 10 hours.
+The instances are provided as XML files.
 
-\section{Algorithm}
+\section{Approach}
+\subsection{Algorithm}
 
+\begin{table}
 \begin{algorithm}[H]
 \DontPrintSemicolon
 \KwData{a set of nurses $N$, a set of days $D$ and shift types $S$, requirement for each shift type on each day $r_{s,d}$, and a set $C$ of soft constraints}
@@ -70,8 +103,7 @@ After these operations, when the schedule has been made feasible again, the solu
 				eliminate all violations of constraint $c$ from $S'_i$ \;
 			}
 		}
-		let $D'$ be a random permutation of $D$ \;
-		\For{each day $d \in D'$}{
+		\For{each day $d \in D$}{
 			let $N_{s,d}$ be the set of nurses assigned to shift type $s$ on day $d$ \;
 			let $n_{s,d} = |N_{s,d}|$ \;
 			\While{$\exists s : n_{s,d} > r_{s,d}$}{
@@ -88,4 +120,59 @@ After these operations, when the schedule has been made feasible again, the solu
 		}
 	}
 \end{algorithm}
+	\caption{Pseudocode for our base algorithm}
+	\label{pseudocode}
+\end{table}
+
+Table \ref{pseudocode} shows the pseudocode for our algorithm.
+It should be noted, as we have made this implicit, that each time something is done for all elements of a set, the order is randomised.
+
+The algorithm that was implemented for this paper can be described as a large neighborhood search guided by soft constraints.
+The thought process behind the algorithm was to create something original that had not been seen in the literature yet.
+The idea was to create relatively simple solution approach that could be readily understood.
+
+After initializing a feasible solution, a certain number $k_N$ of nurses and $k_C$ of constraints are chosen.
+For these nurses the constraints are consecutively enforced.
+Enforcing here is meant in the sense of removing all violations of this constraint for the specific nurse by either or assigning shifts to nurses.
+After this process the remaining schedule is not feasible anymore.
+To get back to a feasible solution we have to repair the schedule. We start by looking through all the days in a random order.
+If the shift requirements are currently not met on a day (either to many shifts are assigned or not enough shifts are assigned), we fix it by either assigning shifts of removing shifts. This assigning or removing shifts to nurses is done by looking at the impact the change would have on the total penalty value of a nurse.
+Assigning or removing shifts is done to the nurse whose penalty value it affects the least.
+
+After these operations, when the schedule has been made feasible again, the solution value is calculated.
+If the new schedule leads to a better solution value, the current schedule is adjusted to this better version and we start the process again.
+
+\subsubsection{Variants}
+
+In the base algorithm, we use a constraints-based repair operator.
+For comparison, we also implemented a random repair operator, which, for each insertion or deletion, simply selects a nurse randomly among the possible nurses, instead of basing the choice on the soft constraints.
+
+Left unspecified in the pseudocode is how to choose $k_N$ and $k_C$.
+Here we considered two variants.
+In the first variant, $k_N$ and $k_C$ are simply the same for every iteration and are fixed at $\Bigl \lceil \frac{|N|}{3} \Bigr \rceil, \Bigl \lceil \frac{|C|}{3} \Bigr \rceil$.
+
+\subsection{Implementation}
+
+The algorithm was implemented in the Java programming language.
+
+To extract the information from the instances we make use of the XML parser of Duysak et al.
+The algorithm itself starts with an initial feasible solution that respects the hard constraints.
+The solution schedule is represented as a two dimensional N x D matrix.
+The rowns correspond to the nurses and the columns to the days in the planning period.
+The entries in the matrix resemble the shift that is assigned to a nurse on a specific day.
+A zero entry means a nurse has a day off and the shift types in an instance are numbered to represent the other entries where a shift is assigned to a nurse.
+
+\section{Results}
+
+Unexpectedly, the random repair operator seems to be working the best.
+
+\section{Conclusion and discussion}
+
+Our algorithm is not very good, for some instances the solution value is about an order of magnitude too high.
+
+In future research, one could investigate whether a more intelligent repair operator that considers multiple columns at once would improve the solution quality.
+
+
+\printbibliography
+
 \end{document}
