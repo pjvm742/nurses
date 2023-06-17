@@ -19,7 +19,7 @@ import nurses.*;
 					if (w.isStartOfWorkingWeekend(roster, d)) {
 						nseq++;
 					} else {
-						if (nseq < min) {
+						if (nseq < min && nseq > 0) {
 							violation += min - nseq;
 						}
 						nseq = 0;

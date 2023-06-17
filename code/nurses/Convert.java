@@ -39,10 +39,10 @@ public class Convert {
 		int D = orig[0].length;
 		int S = 0;
 		for(int i = 0; i < orig.length; i++) {
-			for(int j = 0; j > orig[0].length; j++) {
+			for(int j = 0; j < orig[0].length; j++) {
 				int current = orig[i][j];
 				if(current > S) {
-				S = current;
+					S = current;
 				}
 			}
 		}
@@ -53,8 +53,8 @@ public class Convert {
 			for(int j = 0; j < orig.length; j++) {
 				if(orig[j][d] != 0) {
 					day[orig[j][d] - 1][j] = 1;
-					}
 				}
+			}
 			sol.add(day);
 		}
 		return sol;

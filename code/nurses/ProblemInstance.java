@@ -36,6 +36,11 @@ package nurses;
 			return nurses[nurse].Evaluate(solution[nurse]);
 		}
 
+		public int Report(int[][] sol, int i, int constr) {
+			int c = constraintIDs[constr];
+			return nurses[i].Report(sol[i], constr);
+		}
+
 		public void Enforce(int[][] solution, int nurse, int constraint) {
 			int c = constraintIDs[constraint];
 			nurses[nurse].Enforce(solution[nurse], c);

@@ -81,4 +81,15 @@ public class DynamicParams {
 			max = maxval;
 		}
 	}
+
+	public void report() {
+		System.err.println();
+		for (int i = 0; i < N; i++) {
+			for (int j = 0; j < C; j++) {
+				System.err.printf("%f\t", pdist[i][j] / max);
+			}
+		System.err.println();
+		}
+		System.err.println();
+	}
 }

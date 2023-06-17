@@ -15,14 +15,14 @@ import nurses.*;
 			for (int d = 0; d < Dim.D; d++) {
 				if (roster[d] == 0) {
 					nseq++;
-				} else if (nseq < min) {
+				} else if (nseq < min && nseq > 0) {
 					violation += min - nseq;
 					nseq = 0;
 				}
+				System.out.println(violation);
 			}
-			if(nseq < min) {
+			if (nseq < min) {
 				violation += min - nseq;
-			        nseq = 0;
 			}
 			
 			return violation;

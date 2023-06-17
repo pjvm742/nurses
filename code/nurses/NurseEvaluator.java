@@ -19,6 +19,13 @@ package nurses;
 			return sum;
 		}
 
+		public int Report(int[] roster, int c) {
+			ConstraintEvaluator eval = constraints[c];
+			System.err.println(eval.getClass().getSimpleName());
+			System.err.println(weights[c]);
+			return eval.Evaluate(roster) * weights[c];
+		}
+
 		public void Enforce(int[] roster, int c) {
 			constraints[c].Enforce(roster);
 		}
