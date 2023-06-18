@@ -9,6 +9,12 @@
 
 \title{An algorithm for the nurse rostering problem}
 
+\author{P van Mill, D van Boxtel}
+
+\date{June 2023 \\
+Course: Operations research applications \\
+Maastricht University}
+
 \begin{document}
 \maketitle
 
@@ -109,7 +115,7 @@ Specifically, we have not considered the constraints "two free days after a nigh
 \begin{table}
 \begin{algorithm}[H]
 \DontPrintSemicolon
-\KwData{a set of nurses $N$, a set of days $D$ and shift types $S$, requirement for each shift type on each day $r_{s,d}$, and a set $C$ of soft constraints}
+	\KwData{a set of nurses $N$, a set of days $D$ and shift types $T_{shift}$, requirement for each shift type on each day $r_{s,d}$, and a set $C$ of soft constraints}
 \KwResult{the best schedule $S$ found}
 	\While{there is running time left}{
 		let $S'$ be a copy of the current solution S \;
@@ -145,20 +151,24 @@ Specifically, we have not considered the constraints "two free days after a nigh
 Table \ref{pseudocode} shows the pseudocode for our algorithm.
 It should be noted, as we have made this implicit, that each time something is done for all elements of a set, the order is randomised.
 
-The algorithm that was implemented for this paper can be described as a large neighborhood search guided by soft constraints.
-The thought process behind the algorithm was to create something original that had not been seen in the literature yet.
-The idea was to create relatively simple solution approach that could be readily understood.
+The algorithm can be described as a large neighborhood search guided by soft constraints.
+Specifically, it uses one (parameterised) destroy operator and one repair operator, and both are based on the soft constraints.
+The goal behind the algorithm was to create something original, yet also a relatively simple solution approach that could be readily understood.
 
 After initializing a feasible solution, a certain number $k_N$ of nurses and $k_C$ of constraints are chosen.
 For these nurses the constraints are consecutively enforced.
-Enforcing here is meant in the sense of removing all violations of this constraint for the specific nurse by either or assigning shifts to nurses.
+Enforcing here is meant in the sense of removing all violations of this constraint for the specific nurse by either assigning or unassigning shifts to nurses.
 After this process the remaining schedule is not feasible anymore.
-To get back to a feasible solution we have to repair the schedule. We start by looking through all the days in a random order.
-If the shift requirements are currently not met on a day (either to many shifts are assigned or not enough shifts are assigned), we fix it by either assigning shifts of removing shifts. This assigning or removing shifts to nurses is done by looking at the impact the change would have on the total penalty value of a nurse.
-Assigning or removing shifts is done to the nurse whose penalty value it affects the least.
+To get back to a feasible solution we have to repair the schedule. 
+We look through all the days in a random order.
+If the shift requirements are currently not met on a day (either to many shifts are assigned or not enough shifts are assigned), we fix it by either assigning shifts of removing shifts.
+This assigning or removing shifts to nurses is done by looking at the impact the change would have on the total penalty value of a nurse.
+Assigning or removing shifts is done to the nurse whose penalty value it will increase the least or reduce the most (it should be noted here that these are equivalent: it can happen that assigning a shift reduces the penalty value, or that unassigning one increases it).
 
 After these operations, when the schedule has been made feasible again, the solution value is calculated.
 If the new schedule leads to a better solution value, the current schedule is adjusted to this better version and we start the process again.
+
+For our initial solution, we simply run our repair operator on an empty schedule.
 
 \subsubsection{Variants}
 
@@ -169,16 +179,35 @@ Left unspecified in the pseudocode is how to choose $k_N$ and $k_C$.
 Here we considered two variants.
 In the first variant, $k_N$ and $k_C$ are simply the same for every iteration and are fixed at $\Bigl \lceil \frac{|N|}{3} \Bigr \rceil, \Bigl \lceil \frac{|C|}{3} \Bigr \rceil$.
 
+In the second variant, we use a dynamically updating joint distribution for the $k$s.
+Specifically, each combination $(k_N,k_C)$ is chosen with the pseudo-probability:
+$$\frac{n_{successes}+1}{(n_{tries}+1) (k_N \cdot k_C)}$$
+... essentially the expected success probability divided by a proxy for the amount of effort that the iteration is expected to take ($k_N \cdot k_N$).
+This pseudo-probability distribution of course has to be normed to sum to one, then it is an actual probability distribution.
+
+There are also some choices to be made in how to enforce constraints and how to evaluate the impact of a change.
+For the constraints enforcement, we have not done too much special; we have only made sure that if some shifts are to be assigned or removed within some range, that this is done spread evenly across the range.
+
+For the impact evaluation on the other hand, we have made two quite different versions.
+In the first version, the impact corresponds as closely as possible to how much the penalty value will change as a result of the assignment or removal.
+In the second, looser version, this is much less the case.
+In particular, in the looser version, the constraint contribution for a sequence that exceeds a "maximum consecutive" constraint is the same no matter the length of the sequence and no matter the position of the particular day in the sequence.
+For "minimum consecutive" constraints on the other hand, the impact evaluator encourages every too-short sequence to be completely eliminated and never incentivises making it longer; this is somewhat counter-intuitive as it may well report a reduction in the penalty value when the actual impact is an increase.
+
 \subsection{Implementation}
 
 The algorithm was implemented in the Java programming language.
 
-To extract the information from the instances we make use of the XML parser of Duysak et al.
-The algorithm itself starts with an initial feasible solution that respects the hard constraints.
-The solution schedule is represented as a two dimensional N x D matrix.
+To extract the information from the instances we make use of the XML parser of Duysak, Karzel and Schmitt \cite{DKS}.
+We then further process the instance information into our own formats.
+The solution schedule is represented as a two dimensional N x D matrix, which automatically enforces the hard constraint that every nurse can only be assigned to one shift on each day.
 The rowns correspond to the nurses and the columns to the days in the planning period.
 The entries in the matrix resemble the shift that is assigned to a nurse on a specific day.
 A zero entry means a nurse has a day off and the shift types in an instance are numbered to represent the other entries where a shift is assigned to a nurse.
+
+We also tried to validate our code for the soft constraints evaluation against that of Duysak et al.
+This allowed us to find one critical error in the "minimum consecutive" constraints that changed all our results.
+We did not find any other errors; however, our solution values are still different from those of Duysak et alia and, as we shall see, also different from those of the competition organisers.
 
 \section{Results}
 
@@ -197,6 +226,51 @@ Interestingly, the strict version of the constraints-guided repair operator seem
 The less strictly corresponding version of the constraints-guided operator seems to be equally matched with the random operator for time allowances of 10 and 30 seconds, giving a worse result about as often as it gives a better result.
 The added value of this component remains unclear, but for the rest of the results, we use this repair operator as specified in our base algorithm, rather than switch to the random repair.
 
+Next, how well does our algorithm perform?
+To investigate this, we ran our algorithm on a few representative instances, for varying amounts of time.
+In light of our goal to make a fast algorithm, we only used running times under 5 minutes.
+Table \ref{results} shows the average objective values obtained, with the sample standard deviations.
+For running times of 10 through 90 seconds, the sample size is 8; for 270, the sample size used was 3.
+
+Unfortunately, due to inconsistencies in the constraint evaluation, these results are difficult to compare to those of other authors.
+However, it seems that in most cases our algorithm performs reasonably well.
+
+\begin{table}
+	\begin{tabular}{|c|c|c|c|c|c|}
+		\hline
+		instance & 10 s & 30 s & 90 s & 270 s & best known \\
+		\hline
+		long early 1 & 273 & 254 & 223 & 209 & 197 \\
+		& 22.4 & 19.2& 8.5 & 5.6 & \\
+		\hline
+		long late 1 & 183 & 167 & 138 & 128 & 235 \\
+		& 12.8 & 13.3 & 7.5 & 7.2 & \\
+		\hline
+		long hidden 1 & 1393 & 1141 & 965 & 787 & 346 \\
+		& 68.3 & 67.1 & 51.5 & 37.8 & \\
+		\hline
+		medium early 1 & 273 & 265 & & & 240 \\
+		& 5.46 & 5.60 & & & \\
+		\hline
+		medium late 1 & 121 & 105 & & & 157 \\
+		& 19.2 & 9.9 & & & \\
+		\hline
+		medium hidden 1 & 878 & 592 & & & 111 \\
+		& 94.2 & 38.7 & & & \\
+		\hline
+		sprint early 1 & 52 & 49 & & & 56 \\
+		& 1.83 & 1.06 & & & \\
+		\hline
+		sprint late 1 & 91 & 89 & & & 37 \\
+		& 11.1 & 7.6 & & & \\
+		\hline
+		sprint hidden 1 & 35 & 29 & & & 32 \\
+		& 3.88 & 3.42 & & & \\
+		\hline
+	\end{tabular}
+	\caption{Average objective values for some instances}
+	\label{results}
+\end{table}
 
 Lastly, we tried to see what happens to the distribution of $k_N$ and $k_C$.
 One thing we perceived in general is that the combination (1,1) is very successful, that is, using the destroy operator with only one nurse and one constraint.
