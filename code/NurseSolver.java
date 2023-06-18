@@ -49,8 +49,8 @@ public class NurseSolver {
 			nurses[i] = i;
 		}
 		
-		int kN = N - (int) ((double) N * 2/3);
-		int kC = p.nUsedConstraints - (int) ((double) p.nUsedConstraints * 2/3);
+		//int kN = N - (int) ((double) N * 2/3);
+		//int kC = p.nUsedConstraints - (int) ((double) p.nUsedConstraints * 2/3);
 		
 		int[] constraints = new int[p.nUsedConstraints];
 		for(int i=0; i < p.nUsedConstraints ; i++){
@@ -66,23 +66,23 @@ public class NurseSolver {
 		
 		//Random r = new Random();
 
-		//DynamicParams g = new DynamicParams(N, p.nUsedConstraints);
+		DynamicParams g = new DynamicParams(N, p.nUsedConstraints);
 		
 		int iters = 0;
 		while (System.currentTimeMillis() - startT < timelimit) {
 			int[][] cursol = copy(sol);
 			//int kN = r.nextInt(N) + 1;
 			//int kC = r.nextInt(p.nUsedConstraints) + 1;
-			//g.sample();
-			//int kN = g.kN;
-			//int kC = g.kC;
+			g.sample();
+			int kN = g.kN;
+			int kC = g.kC;
 			destroy(sol, p, nurses, kN, constraints, kC);
 			repair(sol, p, days, nurses);
 			if (p.EvaluateAll(sol) > p.EvaluateAll(cursol)) {
 				sol = cursol; // failure
-				//g.update(false);
+				g.update(false);
 			} else {
-				//g.update(true); // success
+				g.update(true); // success
 			}
 			iters++;
 		}
@@ -106,7 +106,7 @@ public class NurseSolver {
 				int demand = p.demands[d][s];
 				while (count > demand) {
 					boolean first = true;
-		/*			int min = -1;
+					int min = -1;
 					int minval = 0;
 					for (int n = 0; n < p.N; n++) {
 						int i = nurses[n];
@@ -118,14 +118,14 @@ public class NurseSolver {
 							}
 						}
 					}
-					sol[min][d] = 0; */
-					for (int n = 0; n < p.N; n++) {
+					sol[min][d] = 0;
+		/*			for (int n = 0; n < p.N; n++) {
 						int i = nurses[n];
 						if (sol[i][d] == s) {
 							sol[i][d] = 0;
 							break;
 						}
-					}
+					} */
 
 					count--;
 				}
