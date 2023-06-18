@@ -68,6 +68,7 @@ public class NurseSolver {
 
 		DynamicParams g = new DynamicParams(N, p.nUsedConstraints);
 		
+		//g.report();
 		int iters = 0;
 		while (System.currentTimeMillis() - startT < timelimit) {
 			int[][] cursol = copy(sol);

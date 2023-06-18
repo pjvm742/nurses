@@ -5,6 +5,7 @@
 \usepackage[maxbibnames=30,backend=biber]{biblatex}
 \addbibresource{refs.bib}
 
+\usepackage{graphicx}
 
 \title{An algorithm for the nurse rostering problem}
 
@@ -43,49 +44,64 @@ Heuristics based on large neighborhood search have shown to be very useful in ap
 The algorithm in this research creates an initial feasible schedule according to the hard constraints and searches the solution space for improvements using the soft constraints.
 To assess the effectiveness of the proposed approach, we conduct experiments using the instances provided by the INRC2010 and compare them to the optimal solutions that have been found so far. 
 
-The structure of this paper is as follows: in the beginning we will explain upon the problem specification.
+The structure of this paper is as follows: in the beginning we will explain the problem at hand.
 We will take a look at the different constraint and instances of the competition.
 The next part presents the proposed algorithm and its implementation for use on the problem instances.
 After this we describe the experimental setup and discusses the obtained results.
 Finally, the paper concludes with a conclusion and some remarks on possible improvements and future research.
 
 \section{Problem description}
-The problem set out by the competition consists of some specific parts.
+The problem set out by the competition is built up as follows.
 A planning period is specified along with shift types, the day and shift requirements, and the different types of contracts that nurses can have.
 In these contracts the working regulations of the nurses are stated.
 
 The problem consists of a number of constraints that have been divided into hard and soft constraints.
 The hard constraints are the constraints that have to be respected for a schedule to be considered feasible.
-The soft constraints can be seen as preferences of the nurses.
+The soft constraints represent preferences of the nurses, union rules and government regulations.
 
 For the hard constraints we have that shift requirements must be met, that means every demanded shift must be assigned to a nurse, and the constraint that every nurse can work only one shift per day.
 Not violating these constraints leads to a feasible schedule.
 
 There are many more soft constraints that range from working a maximum or minimum number of days in a row to specific requests for days of shifts.
 The soft constraints considered in the problem are the following:
+
 \begin{itemize}
 	\item a maximum/minimum number of total assigned shifts
-	\item a maximum/minimum number of total consecutive assigned shifts
+	\item a maximum/minimum number of consecutive assigned shifts
 	\item a maximum/minimum number of consecutive free days 
-	\item a maximum/minimum of assigned working weekends:
-	a weekend is regarded as a working weekend if the nurse is assigned to a shift at least one day of the weekend.
-	\item requirement of a nurse having a certain skill level for a shift
-	\item requirement for a nurse to work complete weekends
-	this means that a nurse should work all the days in a weekend if the nurse works in that weekend
-	\item identical shift types to be assigned during the weekend
-	\item no night shifts assigned to a nurse before a free weekend
-	\item certain patterns not appearing in the schedule
+	\item a maximum/minimum number of consecutive working weekends
+		(a weekend is regarded as a working weekend if the nurse is assigned to a shift at least one day of the weekend)
+	\item that nurses are only assigned to shifts for which they have the required skills
+	\item that nurses to work complete weekends
+		(this means that if a nurse works in a weekend, they should work on all the days of that weekend)
+	\item that identical shift types are assigned on all days of a weekend
+	\item that no night shifts assigned to a nurse before a free weekend
+	\item that nurses are not assigned on day or specific shifts for which they have submitted an off request
+	\item that certain patterns should not appear in the schedule
 \end{itemize}
 
-Now to be able to distinguish different schedules in terms of solution quality the soft constraint violations are taken into account.
-In every instance of the problem and in every different contract, the constraints are assigned a certain weight.
-Then to validate the solution quality the evaluation of the schedule is done by multiplying the weight times the number of violations for every constraint and for every nurse.
-The sum of this is equal to the final solution value.
+Now to be able to distinguish different schedules in terms of solution quality, the soft constraint violations are checked.
+For constraints with an integer target (i.e. the "maximum/minimum" constraints), the violation value is taken as the difference with the target; forthe other constraints, which are binary, the violation value is either 0 or 1.
+In every instance of the problem and in every different contract, the constraints are assigned certain weights.
+The objective value of a solution is the weighted sum of the violation values for every constraint and for every nurse.
 
-The problem instances can be divided into three different types: the sprint, medium and long instances.
-The competition classified them as such because they are permitted different amounts of running time.
-The sprint instances are allowed 10 seconds of running time, the medium instances three minutes and the long instances 10 hours.
+It should be noted that there are some decisions to be made in how the constraint violations are calculated.
+For example, for the "minimum consecutive" constraints, it makes quite a difference whether sequences at the edges of the planning period are taken into account.
+Arguably, it is incorrect to do so, as the schedule before the planning period and after is unknown and it cannot be said whether the minimum consecutive number is met.
+However, in this case we have decided count this after all, because most researchers seem to do so.
+
+\subsection{Notes on the competition}
+
+The problem instances are divided into three different levels of difficulty: the sprint, medium and long instances.
+The competition classified them as such because they were permitted different amounts of running time.
+In the competition, sprint instances were allowed 10 seconds of running time, medium instances 10 minutes and long instances 10 hours.
 The instances are provided as XML files.
+
+The problem description is somewhat more general than the problems actually represented in the instances.
+In particular, the demands for the days are regular with a period of one week; thus, in practice the occurence of special days with irregular demands is not modeled in the problem.
+
+Relatedly, there are some inconsistencies in the competition between the list of constraints, the given XML schema and the actual instances.
+Specifically, we have not considered the constraints "two free days after a night shift" and "maximum number of working weekends in four weeks" as part of the problem, because these are not used in any of the instances.
 
 \section{Approach}
 \subsection{Algorithm}
@@ -166,7 +182,40 @@ A zero entry means a nurse has a day off and the shift types in an instance are 
 
 \section{Results}
 
-Unexpectedly, the random repair operator seems to be working the best.
+We did some tests to try and determine the added value of various components of our algorithm.
+We perform these tests on the "long" instances, where the differences are best visible, with time allowances of 10 and 30 seconds.
+
+Firstly, we tested the added value of the dynamically updating distribution for $k_N$ and $k_C$.
+As a baseline, we take the version with fixed $k_N$ and $k_C$ and the random repair operator.
+On average, replacing this component resulted in a relative decrease in the objective value of about 10\%, although for some instances there is instead an increase.
+More importantly, the version with dynamic $k$s seems to make much better use of more time.
+
+Next we try to test the added value of two versions of the constraints-guided repair operator, one which corresponds more strictly to the contribution towards the penalty value, and one which corresponds less cleanly (see section "Variants").
+As a baseline, we take the version with the random repair operator, everywhere using the dynamic $k$s.
+Interestingly, the strict version of the constraints-guided repair operator seems to only make things worse, by about 7\% on average.
+
+The less strictly corresponding version of the constraints-guided operator seems to be equally matched with the random operator for time allowances of 10 and 30 seconds, giving a worse result about as often as it gives a better result.
+The added value of this component remains unclear, but for the rest of the results, we use this repair operator as specified in our base algorithm, rather than switch to the random repair.
+
+
+Lastly, we tried to see what happens to the distribution of $k_N$ and $k_C$.
+One thing we perceived in general is that the combination (1,1) is very successful, that is, using the destroy operator with only one nurse and one constraint.
+This is a curious result that we had not expected; on the other hand, it should not lead us to the conclusion that fixing the $k$ to these values would be a good idea, as it might only work well when there is a variety between the iterations.
+
+For one particular instance, the final distribution is visualised in figures \ref{finaldist} and \ref{distdiff}.
+For this instance, it seems that using the destroy operator with more than 4 constraints at once performs poorly; however, we cannot really generalise beyond this instance.
+
+\begin{figure}
+	\includegraphics[width=\linewidth]{"kdist.png"}
+	\caption{Final distribution of the $k$s}
+	\label{finaldist}
+\end{figure}
+
+\begin{figure}
+	\includegraphics[width=\linewidth]{"kdist-diff.png"}
+	\caption{Changes in the distribution of the $k$s during the algorithm}
+	\label{distdiff}
+\end{figure}
 
 \section{Conclusion and discussion}
 

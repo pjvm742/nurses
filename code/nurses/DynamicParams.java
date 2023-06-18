@@ -83,10 +83,17 @@ public class DynamicParams {
 	}
 
 	public void report() {
+		double sum = 0;
+		for (int i = 0; i < N; i++) {
+			for (int j = 0; j < C; j++) {
+				sum += pdist[i][j];
+			}
+		}
+
 		System.err.println();
 		for (int i = 0; i < N; i++) {
 			for (int j = 0; j < C; j++) {
-				System.err.printf("%f\t", pdist[i][j] / max);
+				System.err.printf("%f\t", pdist[i][j] / sum);
 			}
 		System.err.println();
 		}
