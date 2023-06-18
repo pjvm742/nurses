@@ -29,18 +29,25 @@ import nurses.*;
 		}
 
 		public int Contribution(int[] roster, int pos) {
-			int cur = roster[pos];
-			int curval = Evaluate(roster);
-			if (cur == 0) {
-				roster[pos] = 1;
+			if (roster[pos] > 0) {
+				int start = pos;
+				int end = pos;
+				for (; start > 0; start--) {
+					if (roster[start-1] == 0) {
+						break;
+					}
+				}
+				for (; end < Dim.D-1; end++) {
+					if (roster[end+1] == 0) {
+						break;
+					}
+				}
+				int length = end - start + 1;
+				if (length > max) {
+					return 1;
+				}
 			} else {
-				roster[pos] = 0;
-			}
-			int compval = Evaluate(roster);
-			roster[pos] = cur;
-
-			if (curval > compval) {
-				return curval - compval;
+				return 0;
 			}
 			return 0;
 		}
