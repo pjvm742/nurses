@@ -197,6 +197,7 @@ For "minimum consecutive" constraints on the other hand, the impact evaluator en
 \subsection{Implementation}
 
 The algorithm was implemented in the Java programming language.
+Our code is available at \texttt{https://github.com/pjvm742/nurses}.
 
 To extract the information from the instances we make use of the XML parser of Duysak, Karzel and Schmitt \cite{DKS}.
 We then further process the instance information into our own formats.
@@ -293,10 +294,13 @@ For this instance, it seems that using the destroy operator with more than 4 con
 
 \section{Conclusion and discussion}
 
-Our algorithm is not very good, for some instances the solution value is about an order of magnitude too high.
+We have presented a simple large-neighbourhood-search algorithm for the nurse rostering problem.
+The algorithm seems to achieve reasonable results in most cases, within a rather small amount of time, though unfortunately the results are not comparable with other research on the same problem formulation.
+We have investigated various components of our algorithm, although we were not able to firmly establish the added value of one crucial component, namely our constraints-guided repair operator.
 
 In future research, one could investigate whether a more intelligent repair operator that considers multiple columns at once would improve the solution quality.
-
+Another avenue of potential improvement is investigating the impact of different ways of enforcing constraints and of evaluating the impact of changes in the solution.
+It is also a possibility worth investigating if our approach can be combined with a two-phase approach seen in other papers.
 
 \printbibliography
 

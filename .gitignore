@@ -1,15 +1,1 @@
-dep/*
-code/Helper/*
-code/Attributes/*
-*.pdf
-*.aux
-*.log
-/bin/
-.classpath
-.project
-*.class
-instances/*
-files/*
-code/files/*
-*.jar
-results/*
+*
